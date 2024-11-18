@@ -40,27 +40,7 @@ def matmul_multiprocess(A, B, num_processes=4):
     return np.vstack(results)
 ```
 
-# hashcat
-
-```python
-def parallel_hash_crack(hash_to_crack, charset="abcdefghijklmnopqrstuvwxyz", max_length=8):
-    def generate_passwords(start, end):
-        from itertools import product
-        candidates = []
-        for length in range(1, max_length + 1):
-            for guess in product(charset, repeat=length):
-                password = ''.join(guess)
-                if hash(password) == hash_to_crack:  # simplified hash function
-                    return password
-        return None
-    
-    # Simulate parallel processing (in real implementation, use multiprocessing)
-    chunk_size = len(charset) // 4  # Split into 4 parallel tasks
-    chunks = [charset[i:i + chunk_size] for i in range(0, len(charset), chunk_size)]
-    return [generate_passwords(chunk, chunk + chunk_size) for chunk in chunks]
-```
-
-# rejected algorithms
+# other rejected algorithms
 
 ```python
 import numpy as np
@@ -206,3 +186,20 @@ def block_encrypt_parallel(plaintext, key):
     return ''.join(encrypted_blocks)
 ```
 
+```python
+def hashcat(hash_to_crack, charset="abcdefghijklmnopqrstuvwxyz", max_length=8):
+    def generate_passwords(start, end):
+        from itertools import product
+        candidates = []
+        for length in range(1, max_length + 1):
+            for guess in product(charset, repeat=length):
+                password = ''.join(guess)
+                if hash(password) == hash_to_crack:  # simplified hash function
+                    return password
+        return None
+    
+    # Simulate parallel processing (in real implementation, use multiprocessing)
+    chunk_size = len(charset) // 4  # Split into 4 parallel tasks
+    chunks = [charset[i:i + chunk_size] for i in range(0, len(charset), chunk_size)]
+    return [generate_passwords(chunk, chunk + chunk_size) for chunk in chunks]
+```
