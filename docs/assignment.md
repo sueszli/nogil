@@ -13,10 +13,6 @@ prof anmerkungen:
 
 proposal:
 
-- Wir möchten einen parallelisierbaren Algorithmus im GIL-freien Python (seit kurzem via PEP 703 @ Python3.13)[^pep] implementieren.
+- Wir möchten einen parallelisierbaren Algorithmus im GIL-freien Python (seit kurzem via PEP 703 @ Python3.13) implementieren: https://peps.python.org/pep-0703/
 - Diese möchten wir zusätzlich mit Multiprocessing, C-Python Interopt sowie C-Python Extensions vergleichen und die Programme mit verschiedenen GCC-optimization-Flags kompilieren.
-- Wir haben noch keinen konkreten algorithmus aber mal experimente ausgeführt[^snek].
-
-[^ws23]: https://www.complang.tuwien.ac.at/anton/lvas/effizienz-aufgabe23/
-[^pep]: https://peps.python.org/pep-0703/
-[^snek]: https://github.com/sueszli/fast-snek
+- Wir haben noch keinen konkreten algorithmus aber mal experimente ausgeführt: https://github.com/sueszli/fast-snek
