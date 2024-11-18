@@ -40,7 +40,7 @@ def matmul_multiprocess(A, B, num_processes=4):
     return np.vstack(results)
 ```
 
-# other rejected algorithms
+# kmeans
 
 ```python
 import numpy as np
@@ -115,6 +115,8 @@ def kmeans_parallel(data, k, max_iters=100):
     return centroids
 ```
 
+# aes
+
 ```python
 from Crypto.Cipher import AES # hard to benchmark with C because it needs all the weights
 from multiprocessing import Pool
@@ -137,6 +139,8 @@ def aes_parallel(data, key, num_processes=4):
     
     return b''.join(encrypted_chunks)
 ```
+
+# block encryption
 
 ```python
 def block_encrypt(plaintext, key):
@@ -185,6 +189,8 @@ def block_encrypt_parallel(plaintext, key):
     encrypted_blocks = [encrypt_block(block) for block in blocks]
     return ''.join(encrypted_blocks)
 ```
+
+# hashcat
 
 ```python
 def hashcat(hash_to_crack, charset="abcdefghijklmnopqrstuvwxyz", max_length=8):
