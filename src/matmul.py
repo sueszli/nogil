@@ -18,6 +18,10 @@ def matmul_functional(A, B):
     assert len(A[0]) == len(B)
     return [[reduce(lambda x, y: x + y, starmap(lambda a, b: a * b, zip(row, col))) for col in zip(*B)] for row in A]
 
+def matmul_comprehension(A, B):
+    assert len(A[0]) == len(B)
+    return [[sum(a*b for a,b in zip(X_row,Y_col)) for Y_col in zip(*B)] for X_row in A]
+
 def matmul_infix(A, B):
     # https://peps.python.org/pep-0465/
     assert len(A[0]) == len(B)
@@ -52,6 +56,7 @@ import numpy as np
 A = np.zeros((2, 1))
 B = np.zeros((2, 1))
 result = np.dot(A, B)
+result = np.matmul(A, B)
 
 # 
 # torch
@@ -61,9 +66,7 @@ import torch
 
 A = torch.zeros(2, 3)
 B = torch.zeros(2, 3)
-result = torch.mm(A, B)
 result = torch.matmul(A, B)
-result = torch.bmm(A, B)
 
 # 
 # tensorflow
