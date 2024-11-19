@@ -57,6 +57,6 @@ Chosen algorithm: hashcat
 
 benchmarking:
 
+- https://github.com/sharkdp/hyperfine (very nice)
 - https://github.com/sosy-lab/benchexec
-- https://github.com/sharkdp/hyperfine
 - https://github.com/softdevteam/krun/
