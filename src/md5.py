@@ -10,7 +10,7 @@ class MD5Buffer(Enum):
     D = 0x10325476
 
 
-class MD5(object):
+class MD5:
     _string = None
     _buffers = {
         MD5Buffer.A: None,
