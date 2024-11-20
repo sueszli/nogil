@@ -1,0 +1,6 @@
+install:
+
+```bash
+git clone https://github.com/NVIDIA/free-threaded-python
+docker build -t free-threaded-python ./free-threaded-python
+```
