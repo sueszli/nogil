@@ -61,20 +61,18 @@ char* hashcat(const char *target_hash) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <password>\n", argv[0]);
-        return 1;
-    }
-
+    assert(argc == 2);
     char hashed[SHA_DIGEST_LENGTH * 2 + 1];
     sha1_hash(argv[1], hashed);
     
     char *result = hashcat(hashed);
     if (result) {
-        assert(strcmp(result, argv[1]) == 0);
-        printf("success\n");
+        char success = strcmp(result, argv[1]) == 0;
         free(result);
-        return strcmp(result, argv[1]) == 0 ? 0 : 1;
+        if (success) {
+            printf("success\n");
+            return 0;
+        }
     }
     
     printf("failure\n");
