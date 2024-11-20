@@ -81,18 +81,18 @@ def sha256(message: bytearray) -> bytearray:
 # test
 #
 
+if __name__ == "__main__":
+    import hashlib
+    import random
+    import string
 
-import hashlib
-import random
-import string
+    words = [""]
+    generate_random_string = lambda length=8: "".join(random.choices(string.ascii_letters + string.digits, k=length))
+    words.extend([generate_random_string() for _ in range(100)])
 
-words = [""]
-generate_random_string = lambda length=8: "".join(random.choices(string.ascii_letters + string.digits, k=length))
-words.extend([generate_random_string() for _ in range(100)])
+    for word in words:
+        lib_result = hashlib.sha256(word.encode()).hexdigest()
+        my_result = sha256(word).hex()
+        assert lib_result == my_result
 
-for word in words:
-    lib_result = hashlib.sha256(word.encode()).hexdigest()
-    my_result = sha256(bytearray(word, "ascii")).hex()
-    assert lib_result == my_result
-
-print("all tests passed!")
+    print("all tests passed!")

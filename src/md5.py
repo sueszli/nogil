@@ -19,17 +19,17 @@ class MD5(object):
         MD5Buffer.D: None,
     }
 
-    @classmethod
-    def hash(cls, string):
-        cls._string = string
-        preprocessed_bytes = cls._step_2(cls._step_1())
-        cls._step_3()
-        cls._step_4(preprocessed_bytes)
-        return cls._step_5()
+    @staticmethod
+    def hash(string):
+        MD5._string = string
+        preprocessed_bytes = MD5._step_2(MD5._step_1())
+        MD5._step_3()
+        MD5._step_4(preprocessed_bytes)
+        return MD5._step_5()
 
-    @classmethod
-    def _step_1(cls):
-        message_bytes = cls._string.encode("utf-8")
+    @staticmethod
+    def _step_1():
+        message_bytes = MD5._string.encode("utf-8")
         original_bit_len = len(message_bytes) * 8
         padding_len = (448 - (original_bit_len + 1) % 512) % 512
         padded = bytearray(message_bytes)
@@ -37,21 +37,21 @@ class MD5(object):
         padded.extend([0] * ((padding_len - 7) // 8))
         return padded
 
-    @classmethod
-    def _step_2(cls, step_1_result):
-        original_bit_len = len(cls._string) * 8
+    @staticmethod
+    def _step_2(step_1_result):
+        original_bit_len = len(MD5._string) * 8
         length_bytes = struct.pack("<Q", original_bit_len % (2**64))
         result = bytearray(step_1_result)
         result.extend(length_bytes)
         return result
 
-    @classmethod
-    def _step_3(cls):
-        for buffer_type in cls._buffers.keys():
-            cls._buffers[buffer_type] = buffer_type.value
+    @staticmethod
+    def _step_3():
+        for buffer_type in MD5._buffers.keys():
+            MD5._buffers[buffer_type] = buffer_type.value
 
-    @classmethod
-    def _step_4(cls, step_2_result):
+    @staticmethod
+    def _step_4(step_2_result):
         F = lambda x, y, z: (x & y) | (~x & z)
         G = lambda x, y, z: (x & z) | (y & ~z)
         H = lambda x, y, z: x ^ y ^ z
@@ -64,10 +64,10 @@ class MD5(object):
 
         for chunk in chunks:
             X = list(struct.unpack("<16I", chunk))
-            A = cls._buffers[MD5Buffer.A]
-            B = cls._buffers[MD5Buffer.B]
-            C = cls._buffers[MD5Buffer.C]
-            D = cls._buffers[MD5Buffer.D]
+            A = MD5._buffers[MD5Buffer.A]
+            B = MD5._buffers[MD5Buffer.B]
+            C = MD5._buffers[MD5Buffer.C]
+            D = MD5._buffers[MD5Buffer.D]
 
             for i in range(64):
                 if 0 <= i <= 15:
@@ -98,17 +98,17 @@ class MD5(object):
                 C = B
                 B = temp
 
-            cls._buffers[MD5Buffer.A] = modular_add(cls._buffers[MD5Buffer.A], A)
-            cls._buffers[MD5Buffer.B] = modular_add(cls._buffers[MD5Buffer.B], B)
-            cls._buffers[MD5Buffer.C] = modular_add(cls._buffers[MD5Buffer.C], C)
-            cls._buffers[MD5Buffer.D] = modular_add(cls._buffers[MD5Buffer.D], D)
+            MD5._buffers[MD5Buffer.A] = modular_add(MD5._buffers[MD5Buffer.A], A)
+            MD5._buffers[MD5Buffer.B] = modular_add(MD5._buffers[MD5Buffer.B], B)
+            MD5._buffers[MD5Buffer.C] = modular_add(MD5._buffers[MD5Buffer.C], C)
+            MD5._buffers[MD5Buffer.D] = modular_add(MD5._buffers[MD5Buffer.D], D)
 
-    @classmethod
-    def _step_5(cls):
-        A = struct.unpack("<I", struct.pack(">I", cls._buffers[MD5Buffer.A]))[0]
-        B = struct.unpack("<I", struct.pack(">I", cls._buffers[MD5Buffer.B]))[0]
-        C = struct.unpack("<I", struct.pack(">I", cls._buffers[MD5Buffer.C]))[0]
-        D = struct.unpack("<I", struct.pack(">I", cls._buffers[MD5Buffer.D]))[0]
+    @staticmethod
+    def _step_5():
+        A = struct.unpack("<I", struct.pack(">I", MD5._buffers[MD5Buffer.A]))[0]
+        B = struct.unpack("<I", struct.pack(">I", MD5._buffers[MD5Buffer.B]))[0]
+        C = struct.unpack("<I", struct.pack(">I", MD5._buffers[MD5Buffer.C]))[0]
+        D = struct.unpack("<I", struct.pack(">I", MD5._buffers[MD5Buffer.D]))[0]
         return f"{format(A, '08x')}{format(B, '08x')}{format(C, '08x')}{format(D, '08x')}"
 
 
@@ -117,21 +117,18 @@ class MD5(object):
 #
 
 
-def generate_random_string(length=8):
+if __name__ == "__main__":
+    import hashlib
     import random
     import string
 
-    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+    words = [""]
+    generate_random_string = lambda length=8: "".join(random.choices(string.ascii_letters + string.digits, k=length))
+    words.extend([generate_random_string() for _ in range(100)])
 
+    for word in words:
+        lib_result = hashlib.md5(word.encode()).hexdigest()
+        my_result = MD5.hash(word)
+        assert lib_result == my_result
 
-words = [""]
-words.extend([generate_random_string() for _ in range(100)])
-
-for word in words:
-    import hashlib
-
-    lib_result = hashlib.md5(word.encode()).hexdigest()
-    my_result = MD5.hash(word)
-    assert lib_result == my_result
-
-print("all tests passed!")
+    print("all tests passed!")
