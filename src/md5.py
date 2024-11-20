@@ -1,3 +1,7 @@
+"""
+has lib calls we want to avoid
+"""
+
 import struct
 from enum import Enum
 from math import floor, sin
