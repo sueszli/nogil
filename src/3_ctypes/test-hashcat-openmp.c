@@ -13,3 +13,4 @@ rm -rf ./src/3_ctypes/test-hashcat-openmp
 #include <omp.h>
 
 // i have no idae how to openmp this
+// it's recursive
