@@ -10,18 +10,19 @@ services:
       - '8888:8888'
     build:
       context: .
-      dockerfile_inline: |
-        FROM --platform=linux/amd64 python:3.13-alpine
+      dockerfile: dockerfile
+      # dockerfile_inline: |
+      #   FROM --platform=linux/amd64 python:3.13-alpine
 
-        RUN apk add --no-cache --update hyperfine gcc g++
-        WORKDIR /workspace
+      #   RUN apk add --no-cache --update hyperfine gcc g++
+      #   WORKDIR /workspace
         
-        # COPY requirements.txt /workspace/requirements.txt
-        # RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
+      #   # COPY requirements.txt /workspace/requirements.txt
+      #   # RUN pip3 install --upgrade pip && pip3 install -r requirements.txt
 
-        RUN apk add jupyter jupyterlab jupyter_contrib_nbextensions
-        ENV JUPYTER_ENABLE_LAB=yes
-        EXPOSE 8888 # http://localhost:8888/lab
-        CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--no-browser", "--ServerApp.token=''", "--ServerApp.password=''", "--ServerApp.allow_origin='*'", "--ServerApp.disable_check_xsrf=True", "--ServerApp.allow_root=True", "--ServerApp.open_browser=False"]
+      #   RUN apk add jupyter jupyterlab jupyter_contrib_nbextensions
+      #   ENV JUPYTER_ENABLE_LAB=yes
+      #   EXPOSE 8888 # http://localhost:8888/lab
+      #   CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--allow-root", "--no-browser", "--ServerApp.token=''", "--ServerApp.password=''", "--ServerApp.allow_origin='*'", "--ServerApp.disable_check_xsrf=True", "--ServerApp.allow_root=True", "--ServerApp.open_browser=False"]
 
-        CMD ["tail", "-f", "/dev/null"]
+      #   CMD ["tail", "-f", "/dev/null"]
