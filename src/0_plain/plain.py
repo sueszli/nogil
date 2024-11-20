@@ -1,18 +1,3 @@
-def timeit(func) -> callable:
-    import functools
-    import time
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        print(f"{func.__name__}: {end - start:.5f}s")
-        return result
-
-    return wrapper
-
-
 def sha1(msg):
     if isinstance(msg, str):
         msg = msg.encode()
@@ -51,9 +36,7 @@ def sha1(msg):
     return b"".join([v.to_bytes(4, "big") for v in h])
 
 
-@timeit
 def hashcat(target_hash, max_length=8):
-    # pure python
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
     for length in range(1, max_length + 1):
         guesses = [[]]
@@ -67,43 +50,11 @@ def hashcat(target_hash, max_length=8):
     return None
 
 
-@timeit
-def hashcat_itertools(target_hash, max_length=8):
-    # itertools
-    import string
-    from itertools import product
-
-    alphabet = string.ascii_letters + string.digits
-    for length in range(1, max_length + 1):
-        guesses = ("".join(guess) for guess in product(alphabet, repeat=length))
-        for password in guesses:
-            hashed = sha1(password.encode()).hex()
-            if hashed == target_hash:
-                return password
-    return None
-
-
-@timeit
-def hashcat_hashlib(target_hash, max_length=8):
-    # itertools, hashlib
-    import hashlib
-    import string
-    from itertools import product
-
-    alphabet = string.ascii_letters + string.digits
-    for length in range(1, max_length + 1):
-        guesses = ("".join(guess) for guess in product(alphabet, repeat=length))
-        for password in guesses:
-            hashed = hashlib.sha1(password.encode()).hexdigest()
-            if hashed == target_hash:
-                return password
-    return None
-
-
 if __name__ == "__main__":
-    password = "abc"
-    hashed = sha1(password.encode()).hex()
+    import sys
 
-    out = hashcat(hashed)
-    out = hashcat_itertools(hashed)
-    out = hashcat_hashlib(hashed)
+    assert len(sys.argv) == 2
+    password = sys.argv[1]
+
+    hashed = sha1(password.encode()).hex()
+    _ = hashcat(hashed)
