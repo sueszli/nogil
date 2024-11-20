@@ -2,6 +2,7 @@ import hashlib
 from itertools import product
 from string import ascii_letters, digits
 
+
 def crack_hash(target_hash, max_length=8):
     chars = ascii_letters + digits
     

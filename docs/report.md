@@ -55,7 +55,11 @@ Research question:
 
 Chosen algorithm: hashcat
 
-benchmarking:
+- on password storage: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+- we use a simpler one
+- no algorithmic optimizations (e.g. rainbow tables, bloom filters, etc.) just brute-force
+
+Benchmarking:
 
 - https://github.com/sharkdp/hyperfine (very nice)
 - https://github.com/sosy-lab/benchexec
