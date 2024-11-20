@@ -1,3 +1,4 @@
+# SEE: https://leimao.github.io/blog/Python-No-GIL/
 #
 # NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
 #
@@ -132,4 +133,5 @@ RUN set -eux; \
 		ln -svT "$src" "/usr/local/bin/$dst"; \
 	done
 
-CMD ["python3"]
+# stay alive
+CMD ["tail", "-f", "/dev/null"]
