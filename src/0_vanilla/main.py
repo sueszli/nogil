@@ -37,19 +37,13 @@ def sha1(msg):
 
 
 def search_collision(target_hash, max_length=8):
-    from string import ascii_letters, digits
-
-    def product(*args, repeat=1):
-        pools = [tuple(pool) for pool in args] * repeat
-        result = [[]]
-        for pool in pools:
-            result = [x + [y] for x in result for y in pool]
-        for prod in result:
-            yield tuple(prod)
-
-    chars = ascii_letters + digits
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+"
     for length in range(1, max_length + 1):
-        for guess in product(chars, repeat=length):
+        pools = [alphabet] * length
+        guesses = [[]]
+        for pool in pools:
+            guesses = [x + [y] for x in guesses for y in pool]
+        for guess in guesses:
             password = "".join(guess)
             hashed = sha1(password.encode()).hex()
             if hashed == target_hash:
@@ -59,5 +53,4 @@ def search_collision(target_hash, max_length=8):
 
 target = sha1("ab".encode()).hex()
 result = search_collision(target)
-print(f"Hash: {target}")
-print(f"Cracked password: {result}")
+print(f"found password: {result}")
