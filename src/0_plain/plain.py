@@ -38,22 +38,26 @@ def sha1(msg):
 
 def hashcat(target_hash, max_length=8):
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    for length in range(1, max_length + 1):
-        guesses = [[]]
-        for pool in [alphabet] * length:
-            new_guesses = []
-            for x in guesses:
-                for y in pool:
-                    temp = x.copy()
-                    temp.append(y)
-                    new_guesses.append(temp)
-            guesses = new_guesses
+    position = [0] * max_length
 
-        for guess in guesses:
-            password = "".join(guess)
-            hashed = sha1(password.encode()).hex()
+    for length in range(1, max_length + 1):
+        while True:
+            current = "".join(alphabet[position[i]] for i in range(length))
+            hashed = sha1(current).hex()
             if hashed == target_hash:
-                return password
+                return current
+
+            idx = 0
+            while idx < length:
+                position[idx] += 1
+                if position[idx] < len(alphabet):
+                    break
+                position[idx] = 0
+                idx += 1
+
+            if idx == length:
+                break
+
     return None
 
 
