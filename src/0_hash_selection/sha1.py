@@ -1,6 +1,8 @@
 """
 twice as fast as sha256
 
+good tradeoff between security and speed
+
 18578.26it/s
 """
 
@@ -24,12 +26,12 @@ def sha1(msg):
 
     for chunk in [msg[i : i + 64] for i in range(0, len(msg), 64)]:
         w = [bytes_to_word(chunk[i : i + 4]) for i in range(0, 64, 4)]
-        
+
         for i in range(16, 80):
             w.append(lrot(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1))
-        
+
         a, b, c, d, e = h
-        
+
         for i in range(len(w)):
             if i < 20:
                 f, k = d ^ (b & (c ^ d)), 0x5A827999
@@ -41,10 +43,10 @@ def sha1(msg):
                 f, k = b ^ c ^ d, 0xCA62C1D6
             temp = (lrot(a, 5) + f + e + k + w[i]) & mask
             e, d, c, b, a = d, c, lrot(b, 30), a, temp
-        
+
         c_hash = [a, b, c, d, e]
         h = [((v + n) & mask) for v, n in zip(h, c_hash)]
-    
+
     return b"".join([v.to_bytes(4, "big") for v in h])
 
 
