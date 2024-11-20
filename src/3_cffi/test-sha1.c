@@ -20,7 +20,6 @@ void sha1_hash(const char* input, BYTE hash_output[SHA1_BLOCK_SIZE]) {
 int main() {
     const char* message = "wassup";
     BYTE hash[SHA1_BLOCK_SIZE];
-    
     sha1_hash(message, hash);
     
     for(int i = 0; i < SHA1_BLOCK_SIZE; i++) {
