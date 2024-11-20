@@ -1,4 +1,6 @@
 """
+twice as fast as sha256
+
 18578.26it/s
 """
 
@@ -8,6 +10,9 @@ def sha1(msg):
         msg = msg.encode()
     assert isinstance(msg, bytes)
 
+    lrot = lambda value, n: ((value << n) & mask) | (value >> (width - n))
+    bytes_to_word = lambda b: (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]
+
     h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
     width = 32
     mask = 0xFFFFFFFF
@@ -16,12 +21,7 @@ def sha1(msg):
     msg += b"\x80"
     msg += b"\x00" * (-(len(msg) + 8) % 64)
     msg += bytes([(ml >> (56 - i * 8)) & 0xFF for i in range(8)])
-    chunks = [msg[i : i + 64] for i in range(0, len(msg), 64)]
-
-    lrot = lambda value, n: ((value << n) & mask) | (value >> (width - n))
-    bytes_to_word = lambda b: (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]
-
-    for chunk in chunks:
+    for chunk in [msg[i : i + 64] for i in range(0, len(msg), 64)]:
         w = []
         for i in range(0, 64, 4):
             w.append(bytes_to_word(chunk[i : i + 4]))
