@@ -19,5 +19,6 @@ if __name__ == "__main__":
     assert len(sys.argv) == 2
     password = sys.argv[1]
 
-    hashed = sha1(password.encode()).hex()
+    import hashlib
+    hashed = hashlib.sha1(password.encode()).hexdigest()
     _ = hashcat(hashed)
