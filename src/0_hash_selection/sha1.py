@@ -12,8 +12,6 @@ def sha1(msg):
         msg = msg.encode()
     assert isinstance(msg, bytes)
 
-    lrot = lambda value, n: ((value << n) & mask) | (value >> (width - n))
-    bytes_to_word = lambda b: (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]
 
     h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
     width = 32
@@ -24,14 +22,15 @@ def sha1(msg):
     msg += b"\x00" * (-(len(msg) + 8) % 64)
     msg += bytes([(ml >> (56 - i * 8)) & 0xFF for i in range(8)])
 
+    lrot = lambda value, n: ((value << n) & mask) | (value >> (width - n))
+    bytes_to_word = lambda b: (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]
+
     for chunk in [msg[i : i + 64] for i in range(0, len(msg), 64)]:
         w = [bytes_to_word(chunk[i : i + 4]) for i in range(0, 64, 4)]
-
         for i in range(16, 80):
             w.append(lrot(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1))
 
         a, b, c, d, e = h
-
         for i in range(len(w)):
             if i < 20:
                 f, k = d ^ (b & (c ^ d)), 0x5A827999
@@ -41,11 +40,9 @@ def sha1(msg):
                 f, k = (b & c) | (d & (b | c)), 0x8F1BBCDC
             else:
                 f, k = b ^ c ^ d, 0xCA62C1D6
-            temp = (lrot(a, 5) + f + e + k + w[i]) & mask
-            e, d, c, b, a = d, c, lrot(b, 30), a, temp
-
-        c_hash = [a, b, c, d, e]
-        h = [((v + n) & mask) for v, n in zip(h, c_hash)]
+            tmp = (lrot(a, 5) + f + e + k + w[i]) & mask
+            e, d, c, b, a = d, c, lrot(b, 30), a, tmp
+        h = [((v + n) & mask) for v, n in zip(h, [a, b, c, d, e])]
 
     return b"".join([v.to_bytes(4, "big") for v in h])
 

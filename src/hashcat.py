@@ -37,7 +37,6 @@ def sha1(msg):
             w.append(lrot(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1))
 
         a, b, c, d, e = h
-
         for i in range(len(w)):
             if i < 20:
                 f, k = d ^ (b & (c ^ d)), 0x5A827999
