@@ -1,5 +1,5 @@
 """
-has lib calls we want to avoid
+9847.03it/s
 """
 
 import struct
@@ -108,14 +108,27 @@ if __name__ == "__main__":
     import hashlib
     import random
     import string
+    import time
+
+    import tqdm
 
     words = [""]
     generate_random_string = lambda length=8: "".join(random.choices(string.ascii_letters + string.digits, k=length))
-    words.extend([generate_random_string() for _ in range(100)])
+    words.extend([generate_random_string() for _ in range(100_000)])
 
-    for word in words:
+    diffs = []
+    for word in tqdm.tqdm(words):
+        start = time.time()
         lib_result = hashlib.md5(word.encode()).hexdigest()
+        lib_time = time.time() - start
+
+        start = time.time()
         my_result = md5(word)
+        my_time = time.time() - start
+
+        diff = my_time - lib_time
+        diffs.append(diff)
         assert lib_result == my_result
 
+    print(f"average time difference: {sum(diffs) / len(diffs)}")
     print("all tests passed!")
