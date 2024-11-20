@@ -11,14 +11,10 @@ def check_password_chunk(args):
 
 def hashcat(target_hash, max_length=8, num_threads=8):
     import string
+    from itertools import product
     from concurrent.futures import ThreadPoolExecutor
 
     alphabet = string.ascii_letters + string.digits
-
-    def generate_passwords(length, alphabet):
-        from itertools import product
-
-        return ("".join(guess) for guess in product(alphabet, repeat=length))
 
     def chunk_generator(passwords, chunk_size=1000):
         chunk = []
@@ -32,8 +28,8 @@ def hashcat(target_hash, max_length=8, num_threads=8):
 
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
         for length in range(1, max_length + 1):
-            passwords = generate_passwords(length, alphabet)
-            chunks = chunk_generator(passwords)
+            passwords = ("".join(guess) for guess in product(alphabet, repeat=length))
+            chunks = chunk_generator(passwords, chunk_size=1000)
 
             futures = []
             for chunk in chunks:
