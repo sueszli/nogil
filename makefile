@@ -155,7 +155,7 @@ fmt:
 
 	./.venv/bin/python3 -m isort .
 	./.venv/bin/python3 -m autoflake --remove-all-unused-imports --recursive --in-place .
-	./.venv/bin/python3 -m ruff format --config line-length=500 .
+	./.venv/bin/python3 -m ruff format --config line-length=5000 .
 
 .PHONY: up # pull and push changes
 up:
