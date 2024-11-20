@@ -1,4 +1,3 @@
-# SEE: https://leimao.github.io/blog/Python-No-GIL/
 #
 # NOTE: THIS DOCKERFILE IS GENERATED VIA "apply-templates.sh"
 #
