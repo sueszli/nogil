@@ -39,9 +39,8 @@ def sha1(msg):
 def search_collision(target_hash, max_length=8):
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+"
     for length in range(1, max_length + 1):
-        pools = [alphabet] * length
         guesses = [[]]
-        for pool in pools:
+        for pool in [alphabet] * length:
             guesses = [x + [y] for x in guesses for y in pool]
         for guess in guesses:
             password = "".join(guess)
