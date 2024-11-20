@@ -31,6 +31,6 @@ if __name__ == "__main__":
     import sys
 
     assert len(sys.argv) == 2
-    num = sys.argv[1]
+    num = int(sys.argv[1])
 
     _ = fac_multithread(int(num))
