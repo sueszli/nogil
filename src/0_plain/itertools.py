@@ -52,9 +52,10 @@ def hashcat(target_hash, max_length=8):
 
 if __name__ == "__main__":
     import sys
+    import hashlib
 
     assert len(sys.argv) == 2
     password = sys.argv[1]
 
-    hashed = sha1(password.encode()).hex()
+    hashed = hashlib.sha1(password.encode()).hexdigest()
     _ = hashcat(hashed)

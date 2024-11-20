@@ -1,25 +1,8 @@
-def timeit(func) -> callable:
-    import functools
-    import time
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        start = time.time()
-        result = func(*args, **kwargs)
-        end = time.time()
-        print(f"{func.__name__}: {end - start:.5f}s")
-        return result
-
-    return wrapper
-
-
 def hash_password(password):
     from hashlib import sha1
 
     return password, sha1(password.encode()).hexdigest()
 
-
-@timeit
 def hashcat_imap_unordered(target_hash, max_length=8):
     import itertools
     import multiprocessing
