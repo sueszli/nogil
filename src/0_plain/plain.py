@@ -41,7 +41,14 @@ def hashcat(target_hash, max_length=8):
     for length in range(1, max_length + 1):
         guesses = [[]]
         for pool in [alphabet] * length:
-            guesses = [x + [y] for x in guesses for y in pool]
+            new_guesses = []
+            for x in guesses:
+                for y in pool:
+                    temp = x.copy()
+                    temp.append(y)
+                    new_guesses.append(temp)
+            guesses = new_guesses
+
         for guess in guesses:
             password = "".join(guess)
             hashed = sha1(password.encode()).hex()

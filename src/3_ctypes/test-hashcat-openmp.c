@@ -1,7 +1,7 @@
 /*
-docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-hashcat ./src/3_ctypes/test-hashcat.c -lcrypto -lssl
-docker compose exec main ./src/3_ctypes/test-hashcat aaa
-rm -rf ./src/3_ctypes/test-hashcat
+docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-hashcat-openmp ./src/3_ctypes/test-hashcat-openmp.c -lcrypto -lssl
+docker compose exec main ./src/3_ctypes/test-hashcat-openmp a
+rm -rf ./src/3_ctypes/test-hashcat-openmp
 */
 
 #include <stdio.h>
@@ -10,6 +10,7 @@ rm -rf ./src/3_ctypes/test-hashcat
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <omp.h>
 
 #define MAX_LENGTH 8
 #define ALPHABET_SIZE 62
@@ -31,20 +32,20 @@ void sha1_hash(const char *input, char *output) {
 
 char* hashcat(const char *target_hash) {
     char *current = malloc(MAX_LENGTH + 1);
-    if (!current) {
-        return NULL;
-    }
-    current[MAX_LENGTH] = '\0';
+    if (!current) return NULL;
+
+    current[MAX_LENGTH] = '\0'; // Null-terminate the string
 
     for (int length = 1; length <= MAX_LENGTH; length++) {
         for (int position = 0; position < length; position++) {
             for (int i = 0; i < ALPHABET_SIZE; i++) {
                 current[position] = alphabet[i];
-                if (position == length - 1) { // reached end of current combination
+
+                if (position == length - 1) { // If we reached the end of the current combination
                     char hashed[SHA_DIGEST_LENGTH * 2 + 1];
                     sha1_hash(current, hashed);
                     if (strcmp(hashed, target_hash) == 0) {
-                        return current;
+                        return current; // Found matching hash
                     }
                 }
             }

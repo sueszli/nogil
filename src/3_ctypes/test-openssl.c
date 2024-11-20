@@ -1,9 +1,9 @@
 /*
 python -c "import hashlib; print(hashlib.sha1('wassup'.encode()).hexdigest())"
 
-docker compose exec main gcc -fopenmp -o ./src/3_cffi/test-openssl ./src/3_cffi/test-openssl.c -lcrypto -lssl
-docker compose exec main ./src/3_cffi/test-openssl
-rm -rf ./src/3_cffi/test-openssl
+docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-openssl ./src/3_ctypes/test-openssl.c -lcrypto -lssl
+docker compose exec main ./src/3_ctypes/test-openssl
+rm -rf ./src/3_ctypes/test-openssl
 */
 
 

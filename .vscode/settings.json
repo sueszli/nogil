@@ -1,6 +1,9 @@
 {
     "files.associations": {
         "__locale": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "bitset": "c",
+        "string.h": "c",
+        "__node_handle": "c"
     }
 }
