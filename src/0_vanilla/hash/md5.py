@@ -1,5 +1,5 @@
 """
-9847.03it/s
+about 9847.03it/s
 """
 
 import struct
