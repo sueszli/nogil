@@ -71,7 +71,6 @@ int main(int argc, char *argv[]) {
     
     char *result = hashcat(hashed);
     if (result) {
-        // assert that result is the same as argv[1]
         assert(strcmp(result, argv[1]) == 0);
         printf("success\n");
         free(result);
