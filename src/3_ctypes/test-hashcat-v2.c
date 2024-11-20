@@ -1,7 +1,7 @@
 /*
-docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-hashcat ./src/3_ctypes/test-hashcat.c -lcrypto -lssl
-docker compose exec main ./src/3_ctypes/test-hashcat aaa
-rm -rf ./src/3_ctypes/test-hashcat
+docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-hashcat-v2 ./src/3_ctypes/test-hashcat-v2.c -lcrypto -lssl
+docker compose exec main ./src/3_ctypes/test-hashcat-v2 aaa
+rm -rf ./src/3_ctypes/test-hashcat-v2
 */
 
 #include <stdio.h>
@@ -10,11 +10,6 @@ rm -rf ./src/3_ctypes/test-hashcat
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
-
-#define MAX_LENGTH 8
-#define ALPHABET_SIZE 62
-
-const char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 void sha1_hash(const char *input, char *output) {
     unsigned char hash[SHA_DIGEST_LENGTH];
@@ -29,19 +24,40 @@ void sha1_hash(const char *input, char *output) {
     output[SHA_DIGEST_LENGTH * 2] = '\0';
 }
 
-bool try_password(char *current, int position, int length, const char *target_hash) {
-    if (position == length) {
+#define MAX_LENGTH 8
+#define ALPHABET_SIZE 62
+
+bool try_password(char *current, int length, const char *target_hash) {
+    const char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int position[MAX_LENGTH] = {0};
+
+    while (true) {
+        for (int i = 0; i < length; i++) {
+            current[i] = alphabet[position[i]];
+        }
+        current[length] = '\0';
+
         char hashed[SHA_DIGEST_LENGTH * 2 + 1];
         sha1_hash(current, hashed);
-        return strcmp(hashed, target_hash) == 0;
-    }
-
-    for (int i = 0; i < ALPHABET_SIZE; i++) {
-        current[position] = alphabet[i];
-        if (try_password(current, position + 1, length, target_hash)) {
+        if (strcmp(hashed, target_hash) == 0) {
             return true;
         }
+
+        int idx = 0;
+        while (idx < length) {
+            position[idx]++;
+            if (position[idx] < ALPHABET_SIZE) {
+                break;
+            }
+            position[idx] = 0;
+            idx++;
+        }
+
+        if (idx == length) {
+            break;
+        }
     }
+
     return false;
 }
 
@@ -50,12 +66,11 @@ char* hashcat(const char *target_hash) {
     if (!current) return NULL;
 
     for (int length = 1; length <= MAX_LENGTH; length++) {
-        current[length] = '\0';
-        if (try_password(current, 0, length, target_hash)) {
+        if (try_password(current, length, target_hash)) {
             return current;
         }
     }
-    
+
     free(current);
     return NULL;
 }

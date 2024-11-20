@@ -4,6 +4,7 @@
         "stdio.h": "c",
         "bitset": "c",
         "string.h": "c",
-        "__node_handle": "c"
+        "__node_handle": "c",
+        "stdlib.h": "c"
     }
 }
