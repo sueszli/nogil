@@ -1,5 +1,8 @@
 /*
-write this with openmps
+
+TODO:
+- add openmp stuff
+- compare our sha1 vs. openssl sha1
 
 docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-hashcat-v2 ./src/3_ctypes/test-hashcat-v3.c -lcrypto -lssl
 docker compose exec main ./src/3_ctypes/test-hashcat-v3 aaa
