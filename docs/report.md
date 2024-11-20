@@ -58,6 +58,3 @@ Chosen algorithm: hashcat
 - on password storage: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
 - we use a simpler one
 - no algorithmic optimizations (e.g. rainbow tables, bloom filters, etc.) just brute-force
-
-
-add system specs
