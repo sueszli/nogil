@@ -1,3 +1,5 @@
+import multiprocessing
+import time
 from hashlib import sha1
 from itertools import product
 from multiprocessing import Pool
@@ -51,7 +53,7 @@ def check_password_chunk(args):
     return None
 
 
-def search_collision(target_hash, max_length=8, processes=4, chunk_size=10000):
+def search_collision(target_hash, max_length=8, processes=4, chunk_size=100_000):
     alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+"
 
     with Pool(processes) as pool:
@@ -80,12 +82,14 @@ def search_collision(target_hash, max_length=8, processes=4, chunk_size=10000):
 
 
 if __name__ == "__main__":
-    password = "abc1"
+    processes = multiprocessing.cpu_count()
+    chunk_size = max(100_000, 10_000 * processes)
+    print(f"processes: {processes}, chunk_size: {chunk_size}")
+
+    password = "abc"
     hashed = sha1(password.encode()).hex()
 
-    import time
-
     s = time.time()
-    out = search_collision(hashed)
+    out = search_collision(hashed, processes=processes, chunk_size=chunk_size)
     e = time.time()
     print(f"time: {e - s :.5f}s")

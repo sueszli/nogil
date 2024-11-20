@@ -50,7 +50,7 @@ def search_collision(target_hash, max_length=8):
     return None
 
 
-password = "ab"
+password = "abc"
 hashed = sha1(password.encode()).hex()
 
 import time
