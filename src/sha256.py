@@ -1,3 +1,13 @@
+"""
+incredibly slow:
+
+- my implementation: ~7688.53it/s
+- hashlib implementation: ~1907737.45it/s
+
+in practice this is like 32.15s vs 0.14s and is too slow for any practical use.
+"""
+
+
 def sha256(message: bytearray) -> bytearray:
     if isinstance(message, str):
         message = bytearray(message, "ascii")
@@ -85,14 +95,27 @@ if __name__ == "__main__":
     import hashlib
     import random
     import string
+    import time
+
+    import tqdm
 
     words = [""]
     generate_random_string = lambda length=8: "".join(random.choices(string.ascii_letters + string.digits, k=length))
-    words.extend([generate_random_string() for _ in range(100)])
+    words.extend([generate_random_string() for _ in range(100_000)])
 
-    for word in words:
+    diffs = []
+    for word in tqdm.tqdm(words):
+        start = time.time()
         lib_result = hashlib.sha256(word.encode()).hexdigest()
+        lib_time = time.time() - start
+
+        start = time.time()
         my_result = sha256(word).hex()
+        my_time = time.time() - start
+
+        diff = my_time - lib_time
+        diffs.append(diff)
         assert lib_result == my_result
 
+    print(f"average time difference: {sum(diffs) / len(diffs)}")
     print("all tests passed!")
