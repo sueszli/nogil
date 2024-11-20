@@ -11,8 +11,8 @@ def check_password_chunk(args):
 
 def hashcat(target_hash, max_length=8, num_threads=8):
     import string
-    from itertools import product
     from concurrent.futures import ThreadPoolExecutor
+    from itertools import product
 
     alphabet = string.ascii_letters + string.digits
 
