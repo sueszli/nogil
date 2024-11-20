@@ -27,47 +27,40 @@ void sha1_hash(const char *input, char *output) {
 #define MAX_LENGTH 8
 #define ALPHABET_SIZE 62
 
-bool try_password(char *current, int length, const char *target_hash) {
+char* hashcat(const char *target_hash) {
     const char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    int position[MAX_LENGTH] = {0};
-
-    while (true) {
-        for (int i = 0; i < length; i++) {
-            current[i] = alphabet[position[i]];
-        }
-        current[length] = '\0';
-
-        char hashed[SHA_DIGEST_LENGTH * 2 + 1];
-        sha1_hash(current, hashed);
-        if (strcmp(hashed, target_hash) == 0) {
-            return true;
-        }
-
-        int idx = 0;
-        while (idx < length) {
-            position[idx]++;
-            if (position[idx] < ALPHABET_SIZE) {
-                break;
-            }
-            position[idx] = 0;
-            idx++;
-        }
-
-        if (idx == length) {
-            break;
-        }
+    char *current = malloc(MAX_LENGTH + 1);
+    if (!current) {
+        return NULL;
     }
 
-    return false;
-}
-
-char* hashcat(const char *target_hash) {
-    char *current = malloc(MAX_LENGTH + 1);
-    if (!current) return NULL;
-
+    int position[MAX_LENGTH] = {0};
     for (int length = 1; length <= MAX_LENGTH; length++) {
-        if (try_password(current, length, target_hash)) {
-            return current;
+        while (true) {
+            for (int i = 0; i < length; i++) {
+                current[i] = alphabet[position[i]];
+            }
+            current[length] = '\0';
+
+            char hashed[SHA_DIGEST_LENGTH * 2 + 1];
+            sha1_hash(current, hashed);
+            if (strcmp(hashed, target_hash) == 0) {
+                return current;
+            }
+
+            int idx = 0;
+            while (idx < length) {
+                position[idx]++;
+                if (position[idx] < ALPHABET_SIZE) {
+                    break;
+                }
+                position[idx] = 0;
+                idx++;
+            }
+
+            if (idx == length) {
+                break;
+            }
         }
     }
 
