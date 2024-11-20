@@ -29,7 +29,7 @@ class MD5(object):
 
     @classmethod
     def _step_1(cls):
-        message_bytes = cls._string.encode('utf-8')
+        message_bytes = cls._string.encode("utf-8")
         original_bit_len = len(message_bytes) * 8
         padding_len = (448 - (original_bit_len + 1) % 512) % 512
         padded = bytearray(message_bytes)
@@ -40,7 +40,7 @@ class MD5(object):
     @classmethod
     def _step_2(cls, step_1_result):
         original_bit_len = len(cls._string) * 8
-        length_bytes = struct.pack('<Q', original_bit_len % (2**64))
+        length_bytes = struct.pack("<Q", original_bit_len % (2**64))
         result = bytearray(step_1_result)
         result.extend(length_bytes)
         return result
@@ -58,12 +58,12 @@ class MD5(object):
         I = lambda x, y, z: y ^ (x | ~z)
         rotate_left = lambda x, n: (x << n) | (x >> (32 - n))
         modular_add = lambda a, b: (a + b) % pow(2, 32)
-        
+
         T = [floor(pow(2, 32) * abs(sin(i + 1))) for i in range(64)]
-        chunks = [step_2_result[i:i + 64] for i in range(0, len(step_2_result), 64)]
+        chunks = [step_2_result[i : i + 64] for i in range(0, len(step_2_result), 64)]
 
         for chunk in chunks:
-            X = list(struct.unpack('<16I', chunk))
+            X = list(struct.unpack("<16I", chunk))
             A = cls._buffers[MD5Buffer.A]
             B = cls._buffers[MD5Buffer.B]
             C = cls._buffers[MD5Buffer.C]
@@ -97,7 +97,7 @@ class MD5(object):
                 D = C
                 C = B
                 B = temp
-            
+
             cls._buffers[MD5Buffer.A] = modular_add(cls._buffers[MD5Buffer.A], A)
             cls._buffers[MD5Buffer.B] = modular_add(cls._buffers[MD5Buffer.B], B)
             cls._buffers[MD5Buffer.C] = modular_add(cls._buffers[MD5Buffer.C], C)
@@ -112,21 +112,24 @@ class MD5(object):
         return f"{format(A, '08x')}{format(B, '08x')}{format(C, '08x')}{format(D, '08x')}"
 
 
-"""
-eval
-"""
+#
+# test
+#
 
 
 def generate_random_string(length=8):
     import random
     import string
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+    return "".join(random.choices(string.ascii_letters + string.digits, k=length))
+
 
 words = [""]
 words.extend([generate_random_string() for _ in range(100)])
 
 for word in words:
     import hashlib
+
     lib_result = hashlib.md5(word.encode()).hexdigest()
     my_result = MD5.hash(word)
     assert lib_result == my_result
