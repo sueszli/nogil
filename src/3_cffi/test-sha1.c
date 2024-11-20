@@ -1,4 +1,6 @@
 /*
+python -c "import hashlib; print(hashlib.sha1('wassup'.encode()).hexdigest())"
+
 docker compose exec main gcc -fopenmp -o ./src/3_cffi/test-sha1 ./src/3_cffi/test-sha1.c ./src/3_cffi/sha1.c
 docker compose exec main ./src/3_cffi/test-sha1
 rm -rf ./src/3_cffi/test-sha1
@@ -16,7 +18,7 @@ void sha1_hash(const char* input, BYTE hash_output[SHA1_BLOCK_SIZE]) {
 }
 
 int main() {
-    const char* message = "Hello, World!";
+    const char* message = "wassup";
     BYTE hash[SHA1_BLOCK_SIZE];
     
     sha1_hash(message, hash);
