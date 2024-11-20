@@ -13,7 +13,7 @@ venv:
 	
 	rm -rf .venv
 	python -m venv .venv
-	./.venv/bin/python3 -m pip install -r requirements.txt
+	./.venv/bin/python -m pip install -r requirements.txt
 	@echo "to activate venv, run: source .venv/bin/activate"
 
 .PHONY: venv-lock # freeze venv into requirements.txt
