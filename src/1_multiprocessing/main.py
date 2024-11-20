@@ -1,95 +1,90 @@
-import multiprocessing
-import time
-from hashlib import sha1
-from itertools import product
-from multiprocessing import Pool
+def timeit(func) -> callable:
+    import functools
+    import time
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time.time()
+        result = func(*args, **kwargs)
+        end = time.time()
+        print(f"{func.__name__}: {end - start:.5f}s")
+        return result
+
+    return wrapper
 
 
-def sha1(msg):
-    if isinstance(msg, str):
-        msg = msg.encode()
-    assert isinstance(msg, bytes)
+def hash_password(password):
+    from hashlib import sha1
 
-    ml = len(msg) * 8
-    msg += b"\x80"
-    msg += b"\x00" * (-(len(msg) + 8) % 64)
-    msg += bytes([(ml >> (56 - i * 8)) & 0xFF for i in range(8)])
-
-    width = 32
-    lrot = lambda value, n: ((value << n) & 0xFFFFFFFF) | (value >> (width - n))
-    bytes_to_word = lambda b: (b[0] << 24) | (b[1] << 16) | (b[2] << 8) | b[3]
-
-    h = [0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0]
-    for chunk in [msg[i : i + 64] for i in range(0, len(msg), 64)]:
-        w = [bytes_to_word(chunk[i : i + 4]) for i in range(0, 64, 4)]
-
-        for i in range(16, 80):
-            w.append(lrot(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1))
-
-        a, b, c, d, e = h
-        for i in range(len(w)):
-            if i < 20:
-                f, k = d ^ (b & (c ^ d)), 0x5A827999
-            elif i < 40:
-                f, k = b ^ c ^ d, 0x6ED9EBA1
-            elif i < 60:
-                f, k = (b & c) | (d & (b | c)), 0x8F1BBCDC
-            else:
-                f, k = b ^ c ^ d, 0xCA62C1D6
-            tmp = (lrot(a, 5) + f + e + k + w[i]) & 0xFFFFFFFF
-            e, d, c, b, a = d, c, lrot(b, 30), a, tmp
-        h = [((v + n) & 0xFFFFFFFF) for v, n in zip(h, [a, b, c, d, e])]
-
-    return b"".join([v.to_bytes(4, "big") for v in h])
+    return password, sha1(password.encode()).hexdigest()
 
 
-def check_password_chunk(args):
-    chunk, target_hash = args
-    for guess in chunk:
-        password = "".join(guess)
-        hashed = sha1(password.encode()).hex()
-        if hashed == target_hash:
-            return password
+@timeit
+def hashcat_imap_unordered(target_hash, max_length=8):
+    import itertools
+    import multiprocessing
+    import string
+
+    alphabet = string.ascii_letters + string.digits
+    with multiprocessing.Pool(
+        processes=multiprocessing.cpu_count(),
+        maxtasksperchild=max(100_000, 10_000 * len(alphabet) ** max_length),
+    ) as pool:
+        for length in range(1, max_length + 1):
+            guesses = ("".join(guess) for guess in itertools.product(alphabet, repeat=length))
+            for password, hashed in pool.imap_unordered(hash_password, guesses):
+                if hashed == target_hash:
+                    pool.terminate()
+                    return password
     return None
 
 
-def search_collision(target_hash, max_length=8, processes=4, chunk_size=100_000):
-    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+"
+@timeit
+def hashcat_imap(target_hash, max_length=8):
+    import itertools
+    import multiprocessing
+    import string
 
-    with Pool(processes) as pool:
+    alphabet = string.ascii_letters + string.digits
+    with multiprocessing.Pool(
+        processes=multiprocessing.cpu_count(),
+        maxtasksperchild=max(100_000, 10_000 * len(alphabet) ** max_length),
+    ) as pool:
         for length in range(1, max_length + 1):
-            all_combinations = product(alphabet, repeat=length)
-            current_chunk = []
+            guesses = ("".join(guess) for guess in itertools.product(alphabet, repeat=length))
+            for password, hashed in pool.imap(hash_password, guesses):
+                if hashed == target_hash:
+                    pool.terminate()
+                    return password
+    return None
 
-            for combo in all_combinations:
-                current_chunk.append(combo)
-                if len(current_chunk) >= chunk_size:
-                    tasks = [(current_chunk, target_hash)]
-                    result = pool.map(check_password_chunk, tasks)
-                    for r in result:
-                        if r is not None:
-                            return r
-                    current_chunk = []
 
-            if current_chunk:
-                tasks = [(current_chunk, target_hash)]
-                result = pool.map(check_password_chunk, tasks)
-                for r in result:
-                    if r is not None:
-                        return r
+@timeit
+def hashcat_map(target_hash, max_length=8):
+    import itertools
+    import multiprocessing
+    import string
 
+    alphabet = string.ascii_letters + string.digits
+    with multiprocessing.Pool(
+        processes=multiprocessing.cpu_count(),
+        maxtasksperchild=max(100_000, 10_000 * len(alphabet) ** max_length),
+    ) as pool:
+        for length in range(1, max_length + 1):
+            guesses = ("".join(guess) for guess in itertools.product(alphabet, repeat=length))
+            for password, hashed in pool.map(hash_password, guesses):
+                if hashed == target_hash:
+                    pool.terminate()
+                    return password
     return None
 
 
 if __name__ == "__main__":
-    processes = multiprocessing.cpu_count()
-    chunk_size = max(100_000, 10_000 * processes)
-    print(f"processes: {processes}, chunk_size: {chunk_size}")
+    import hashlib
 
     password = "abc"
-    hashed = sha1(password.encode()).hex()
+    hashed = hashlib.sha1(password.encode()).hexdigest()
 
-    s = time.time()
-    out = search_collision(hashed, processes=processes, chunk_size=chunk_size)
-    e = time.time()
-    print(f"time: {e - s :.5f}s")
+    out = hashcat_imap_unordered(hashed)
+    out = hashcat_imap(hashed)
+    out = hashcat_map(hashed)
