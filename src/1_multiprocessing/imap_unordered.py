@@ -3,6 +3,7 @@ def hash_password(password):
 
     return password, sha1(password.encode()).hexdigest()
 
+
 def hashcat(target_hash, max_length=8):
     import itertools
     import multiprocessing
@@ -21,9 +22,10 @@ def hashcat(target_hash, max_length=8):
                     return password
     return None
 
+
 if __name__ == "__main__":
-    import sys
     import hashlib
+    import sys
 
     assert len(sys.argv) == 2
     password = sys.argv[1]

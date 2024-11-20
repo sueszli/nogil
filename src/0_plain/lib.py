@@ -14,8 +14,8 @@ def hashcat(target_hash, max_length=8):
 
 
 if __name__ == "__main__":
-    import sys
     import hashlib
+    import sys
 
     assert len(sys.argv) == 2
     password = sys.argv[1]
