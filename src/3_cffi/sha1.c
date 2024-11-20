@@ -3,8 +3,7 @@
 #include "sha1.h"
 #define ROTLEFT(a, b)((a << b) | (a >> (32 - b)))
 
-void sha1_transform(SHA1_CTX * ctx,
-    const BYTE data[]) {
+void sha1_transform(SHA1_CTX * ctx, const BYTE data[]) {
     WORD a, b, c, d, e, i, j, t, m[80];
 
     for (i = 0, j = 0; i < 16; ++i, j += 4)
