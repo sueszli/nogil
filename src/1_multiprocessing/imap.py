@@ -10,10 +10,7 @@ def hashcat(target_hash, max_length=8):
     import string
 
     alphabet = string.ascii_letters + string.digits
-    with multiprocessing.Pool(
-        processes=multiprocessing.cpu_count(),
-        maxtasksperchild=max(100_000, 10_000 * len(alphabet) ** max_length),
-    ) as pool:
+    with multiprocessing.Pool(processes=multiprocessing.cpu_count(), maxtasksperchild=1000) as pool:
         for length in range(1, max_length + 1):
             guesses = ("".join(guess) for guess in itertools.product(alphabet, repeat=length))
             for password, hashed in pool.imap(hash_password, guesses):
