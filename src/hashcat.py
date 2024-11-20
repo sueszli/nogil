@@ -3,8 +3,6 @@ from string import ascii_letters, digits
 
 from tqdm import tqdm
 
-from sha256 import sha256
-
 
 def timeit(func) -> callable:
     import functools
@@ -27,8 +25,8 @@ def crack_hash(target_hash, max_length=8):
     for length in range(1, max_length + 1):
         for guess in tqdm(product(chars, repeat=length)):
             password = "".join(guess)
-            hashed = sha256(password.encode()).hex()
-            # hashed = hashlib.sha256(password.encode()).hexdigest()
+            # hashed = sha256(password.encode()).hex()
+            hashed = hashlib.sha256(password.encode()).hexdigest()
             if hashed == target_hash:
                 return password
     return None
