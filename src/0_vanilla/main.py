@@ -50,6 +50,12 @@ def search_collision(target_hash, max_length=8):
     return None
 
 
-target = sha1("ab".encode()).hex()
-result = search_collision(target)
-print(f"found password: {result}")
+password = "ab"
+hashed = sha1(password.encode()).hex()
+
+import time
+
+s = time.time()
+out = search_collision(hashed)
+e = time.time()
+print(f"time: {e - s :.5f}s")
