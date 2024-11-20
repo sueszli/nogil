@@ -31,4 +31,4 @@ if __name__ == "__main__":
     password = sys.argv[1]
 
     hashed = hashlib.sha1(password.encode()).hexdigest()
-    _ = hashcat(hashed)
+    assert hashcat(hashed) == password

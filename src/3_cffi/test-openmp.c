@@ -1,7 +1,7 @@
 /*
-docker compose exec main gcc -fopenmp -o ./src/3_cffi/test ./src/3_cffi/test.c
-docker compose exec main ./src/3_cffi/test
-rm -rf ./src/3_cffi/test
+docker compose exec main gcc -fopenmp -o ./src/3_cffi/test-openmp ./src/3_cffi/test-openmp.c
+docker compose exec main ./src/3_cffi/test-openmp
+rm -rf ./src/3_cffi/test-openmp
 */
 
 #include <stdio.h>

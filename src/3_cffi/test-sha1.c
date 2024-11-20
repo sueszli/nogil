@@ -1,5 +1,12 @@
+/*
+docker compose exec main gcc -fopenmp -o ./src/3_cffi/test-sha1 ./src/3_cffi/test-sha1.c ./src/3_cffi/sha1.c
+docker compose exec main ./src/3_cffi/test-sha1
+rm -rf ./src/3_cffi/test-sha1
+*/
+
 #include "sha1.h"
 #include <string.h>
+#include <stdio.h>
 
 void sha1_hash(const char* input, BYTE hash_output[SHA1_BLOCK_SIZE]) {
     SHA1_CTX ctx;
