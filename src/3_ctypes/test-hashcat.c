@@ -29,28 +29,33 @@ void sha1_hash(const char *input, char *output) {
     output[SHA_DIGEST_LENGTH * 2] = '\0';
 }
 
-char* hashcat(const char *target_hash) {
-    char *current = malloc(MAX_LENGTH + 1);
-    if (!current) {
-        return NULL;
+bool try_password(char *current, int position, int length, const char *target_hash) {
+    if (position == length) {
+        char hashed[SHA_DIGEST_LENGTH * 2 + 1];
+        sha1_hash(current, hashed);
+        return strcmp(hashed, target_hash) == 0;
     }
-    current[MAX_LENGTH] = '\0';
 
-    for (int length = 1; length <= MAX_LENGTH; length++) {
-        for (int position = 0; position < length; position++) {
-            for (int i = 0; i < ALPHABET_SIZE; i++) {
-                current[position] = alphabet[i];
-                if (position == length - 1) { // reached end of current combination
-                    char hashed[SHA_DIGEST_LENGTH * 2 + 1];
-                    sha1_hash(current, hashed);
-                    if (strcmp(hashed, target_hash) == 0) {
-                        return current;
-                    }
-                }
-            }
+    for (int i = 0; i < ALPHABET_SIZE; i++) {
+        current[position] = alphabet[i];
+        if (try_password(current, position + 1, length, target_hash)) {
+            return true;
         }
     }
+    return false;
+}
 
+char* hashcat(const char *target_hash) {
+    char *current = malloc(MAX_LENGTH + 1);
+    if (!current) return NULL;
+
+    for (int length = 1; length <= MAX_LENGTH; length++) {
+        current[length] = '\0';
+        if (try_password(current, 0, length, target_hash)) {
+            return current;
+        }
+    }
+    
     free(current);
     return NULL;
 }
