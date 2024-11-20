@@ -11,19 +11,6 @@ rm -rf ./src/3_ctypes/test-hashcat-v2
 #include <stdlib.h>
 #include <assert.h>
 
-void sha1_hash(const char *input, char *output) {
-    unsigned char hash[SHA_DIGEST_LENGTH];
-    SHA_CTX ctx;
-    SHA1_Init(&ctx);
-    SHA1_Update(&ctx, input, strlen(input));
-    SHA1_Final(hash, &ctx);
-    
-    for(int i = 0; i < SHA_DIGEST_LENGTH; i++) {
-        sprintf(output + (i * 2), "%02x", hash[i]);
-    }
-    output[SHA_DIGEST_LENGTH * 2] = '\0';
-}
-
 #define MAX_LENGTH 8
 #define ALPHABET_SIZE 62
 
@@ -43,7 +30,16 @@ char* hashcat(const char *target_hash) {
             current[length] = '\0';
 
             char hashed[SHA_DIGEST_LENGTH * 2 + 1];
-            sha1_hash(current, hashed);
+            unsigned char hash[SHA_DIGEST_LENGTH];
+            SHA_CTX ctx;
+            SHA1_Init(&ctx);
+            SHA1_Update(&ctx, current, strlen(current));
+            SHA1_Final(hash, &ctx);
+            
+            for(int i = 0; i < SHA_DIGEST_LENGTH; i++) {
+                sprintf(hashed + (i * 2), "%02x", hash[i]);
+            }
+            hashed[SHA_DIGEST_LENGTH * 2] = '\0';
             if (strcmp(hashed, target_hash) == 0) {
                 return current;
             }
