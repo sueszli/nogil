@@ -2,12 +2,16 @@
 # system specs
 # 
 
-# macos
-system_profiler SPSoftwareDataType SPHardwareDataType
-
-# linux
-lscpu
-cat /proc/meminfo
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macos
+    system_profiler SPSoftwareDataType SPHardwareDataType
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    # linux
+    lscpu
+    cat /proc/meminfo
+else
+    echo "unsupported OS type: $OSTYPE"
+fi
 
 # 
 # benchmark

@@ -28,16 +28,16 @@ in-lock:
 
 .PHONY: docker-up # run docker container
 docker-up:
-	docker-compose up --detach
+	docker compose up --detach
 	@echo "to exec into docker container, run: docker exec -it main bash"
 
 .PHONY: docker-build # save changes to container
 docker-build:
-	docker-compose build
+	docker compose build
 
 .PHONY: docker-clean # wipe everything in all docker containers
 docker-clean:
-	docker-compose down
+	docker compose down
 
 	docker stop $$(docker ps -a -q) || true
 	docker rm $$(docker ps -a -q) || true
