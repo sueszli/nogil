@@ -1,6 +1,6 @@
 """
 twice as fast as sha256
-about half as fast as hashlib
+about half as fast as `hashlib.sha1`
 good tradeoff between security and speed
 
 about 18578.26it/s
