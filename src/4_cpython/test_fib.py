@@ -1,6 +1,5 @@
 import fibmodule
 
-
 print(fibmodule.__doc__)  # 'Efficient Fibonacci number calculator'
 
 print(dir(fibmodule))
