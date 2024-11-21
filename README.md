@@ -38,14 +38,13 @@ docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "python
 # multithreading
 docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "PYTHON_GIL=1 python /workspace/src/2_multithreading/executor.py 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
 docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "PYTHON_GIL=0 python /workspace/src/2_multithreading/executor.py 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
-
 docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "PYTHON_GIL=1 python /workspace/src/2_multithreading/workers.py 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
 docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "PYTHON_GIL=0 python /workspace/src/2_multithreading/workers.py 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
 
 # ctypes
 docker compose exec main gcc -fopenmp -fPIC -shared -o ./src/3_ctypes/libhashcat.so ./src/3_ctypes/hashcat.c -lcrypto -lssl
-docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "python ./src/3_ctypes/invoke_hashcat.py ./src/3_ctypes/libhashcat.so 7e240de74fb1ed08fa08d38063f6a6a91462a815"
-rm -rf ./src/3_ctypes/libhashcat.so && tail -n +2 tmp.csv >> results.csv
+docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "python ./src/3_ctypes/invoke_hashcat.py ./src/3_ctypes/libhashcat.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
+rm -rf ./src/3_ctypes/libhashcat.so 
 
 docker compose exec main gcc -fopenmp -fPIC -shared -o ./src/3_ctypes/libhashcat_openmp.so ./src/3_ctypes/hashcat_openmp.c -lcrypto -lssl
 docker compose exec main /root/.cargo/bin/hyperfine --export-csv tmp.csv "python ./src/3_ctypes/invoke_hashcat.py ./src/3_ctypes/libhashcat_openmp.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
