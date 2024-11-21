@@ -31,6 +31,8 @@ if __name__ == "__main__":
     import sys
 
     assert len(sys.argv) == 2
-    num = int(sys.argv[1])
+    password = sys.argv[1]
 
-    _ = fac_multithread(int(num))
+    # import hashlib
+    # hashed = hashlib.sha1(password.encode()).hexdigest()
+    # assert hashcat(hashed) == password
