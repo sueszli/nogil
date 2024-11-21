@@ -12,10 +12,11 @@ rm -rf ./src/3_ctypes/test_hashcat_v2
 #include <assert.h>
 
 #define MAX_LENGTH 8
-#define ALPHABET_SIZE 62
 
 char* hashcat(const char *target_hash) {
     const char alphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const int alphabet_size = 62;
+
     char *current = malloc(MAX_LENGTH + 1);
     if (!current) {
         return NULL;
@@ -47,7 +48,7 @@ char* hashcat(const char *target_hash) {
             int idx = 0;
             while (idx < length) {
                 position[idx]++;
-                if (position[idx] < ALPHABET_SIZE) {
+                if (position[idx] < alphabet_size) {
                     break;
                 }
                 position[idx] = 0;
