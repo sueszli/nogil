@@ -74,6 +74,8 @@ Warmup: 3 runs
 
 Docker with Python 3.13t experimental build
 
+![Performance Overview](docs/assets/perf.png){ width=100% }
+
 |command                            |      mean|    stddev|    median|      user|    system|       min|       max|
 |:----------------------------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
 |plain: itertools.py                | 0.5674692| 0.0119883| 0.5700655| 0.5599028| 0.0074184| 0.5496380| 0.5865690|
@@ -88,7 +90,7 @@ Docker with Python 3.13t experimental build
 |multithreading: GIL=1 workers.py   | 0.1304648| 0.0071726| 0.1292655| 0.1178397| 0.0081775| 0.1242261| 0.1582329|
 |multithreading: GIL=0 workers.py   | 0.1677349| 0.0076839| 0.1685633| 0.1931002| 0.0202853| 0.1429964| 0.1760283|
 |ctypes: invoke_hashcat.py          | 0.0934947| 0.0031416| 0.0929726| 0.0882496| 0.0049164| 0.0891827| 0.0996272|
-|ctypes: invoke_hashcat.py          | 0.1021338| 0.0056378| 0.1003631| 0.0986943| 0.0083828| 0.0976012| 0.1269725|
+|ctypes: invoke_hashcat.py (openmp) | 0.1021338| 0.0056378| 0.1003631| 0.0986943| 0.0083828| 0.0976012| 0.1269725|
 |cpython: invoke_hashcat.py         | 0.1006056| 0.0043579| 0.0997623| 0.0950439| 0.0052310| 0.0943297| 0.1081794|
 
 # Addendum
