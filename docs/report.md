@@ -43,6 +43,7 @@ prof anmerkungen:
 - und unsere präsi muss etwas kompakter sein, weil wir den algo erklären müssen und die benotung ist eig solely based auf die präsi haha
 -->
 
+# Motivation
 
 Motivation:
 
@@ -62,17 +63,7 @@ Chosen algorithm: hashcat
 
 Cpython dependency `Python.h`: https://github.com/python/cpython/blob/main/Include/Python.h
 
-# Motivation
-
-
 # Experiments
-
-
-Target hash: `aaa`
-
-Warmup: 3 runs
-
-Docker with Python 3.13t experimental build
 
 ![Performance Overview](docs/assets/perf.png){ width=100% }
 
@@ -92,6 +83,14 @@ Docker with Python 3.13t experimental build
 |ctypes: invoke_hashcat.py          | 0.0934947| 0.0031416| 0.0929726| 0.0882496| 0.0049164| 0.0891827| 0.0996272|
 |ctypes: invoke_hashcat.py (openmp) | 0.1021338| 0.0056378| 0.1003631| 0.0986943| 0.0083828| 0.0976012| 0.1269725|
 |cpython: invoke_hashcat.py         | 0.1006056| 0.0043579| 0.0997623| 0.0950439| 0.0052310| 0.0943297| 0.1081794|
+
+Target hash: `aaa`
+
+Warmup: 3 runs
+
+Docker with Python 3.13t experimental build
+
+
 
 # Addendum
 
