@@ -44,14 +44,13 @@ docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.
 # ctypes
 docker compose exec main gcc -fopenmp -fPIC -shared -o ./src/3_ctypes/libhashcat.so ./src/3_ctypes/hashcat.c -lcrypto -lssl
 docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.csv "python ./src/3_ctypes/invoke_hashcat.py ./src/3_ctypes/libhashcat.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
-rm -rf ./src/3_ctypes/libhashcat.so 
 
 docker compose exec main gcc -fopenmp -fPIC -shared -o ./src/3_ctypes/libhashcat_openmp.so ./src/3_ctypes/hashcat_openmp.c -lcrypto -lssl
 docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.csv "python ./src/3_ctypes/invoke_hashcat.py ./src/3_ctypes/libhashcat_openmp.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
-rm -rf ./src/3_ctypes/libhashcat_openmp.so
 
 # cpython
-
+docker compose exec main gcc -shared -fopenmp -o ./src/4_cpython/hashcatmodule.so -fPIC -I/usr/local/include/python3.13t ./src/4_cpython/hashcat.c -lcrypto -lssl
+docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.csv "python ./src/4_cpython/invoke_hashcat.py ./src/3_ctypes/libhashcat_openmp.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
 
 rm tmp.csv
 ```

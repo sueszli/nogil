@@ -59,6 +59,7 @@ Chosen algorithm: hashcat
 - we use a simpler one
 - no algorithmic optimizations (e.g. rainbow tables, bloom filters, etc.) just brute-force
 
+Cpython dependency `Python.h`: https://github.com/python/cpython/blob/main/Include/Python.h
 
 # Addendum
 
