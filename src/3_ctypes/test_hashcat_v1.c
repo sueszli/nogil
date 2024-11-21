@@ -1,7 +1,7 @@
 /*
-docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test-hashcat-v1 ./src/3_ctypes/test-hashcat-v1.c -lcrypto -lssl
-docker compose exec main ./src/3_ctypes/test-hashcat-v1 aaa
-rm -rf ./src/3_ctypes/test-hashcat-v1
+docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test_hashcat-v1 ./src/3_ctypes/test_hashcat-v1.c -lcrypto -lssl
+docker compose exec main ./src/3_ctypes/test_hashcat-v1 aaa
+rm -rf ./src/3_ctypes/test_hashcat-v1
 */
 
 #include <stdio.h>
