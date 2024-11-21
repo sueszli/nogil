@@ -6,7 +6,6 @@ docker compose exec main ./src/3_ctypes/test_openssl
 rm -rf ./src/3_ctypes/test_openssl
 */
 
-
 #include <stdio.h>
 #include <string.h>
 #include <openssl/sha.h>

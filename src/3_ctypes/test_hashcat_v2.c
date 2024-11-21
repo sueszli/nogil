@@ -1,7 +1,7 @@
 /*
-docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test_hashcat-v2 ./src/3_ctypes/test_hashcat-v2.c -lcrypto -lssl
-docker compose exec main ./src/3_ctypes/test_hashcat-v2 aaa
-rm -rf ./src/3_ctypes/test_hashcat-v2
+docker compose exec main gcc -fopenmp -o ./src/3_ctypes/test_hashcat_v2 ./src/3_ctypes/test_hashcat_v2.c -lcrypto -lssl
+docker compose exec main ./src/3_ctypes/test_hashcat_v2 aaa
+rm -rf ./src/3_ctypes/test_hashcat_v2
 */
 
 #include <stdio.h>
@@ -62,6 +62,19 @@ char* hashcat(const char *target_hash) {
 
     free(current);
     return NULL;
+}
+
+void sha1_hash(const char *input, char *output) {
+    unsigned char hash[SHA_DIGEST_LENGTH];
+    SHA_CTX ctx;
+    SHA1_Init(&ctx);
+    SHA1_Update(&ctx, input, strlen(input));
+    SHA1_Final(hash, &ctx);
+    
+    for(int i = 0; i < SHA_DIGEST_LENGTH; i++) {
+        sprintf(output + (i * 2), "%02x", hash[i]);
+    }
+    output[SHA_DIGEST_LENGTH * 2] = '\0';
 }
 
 int main(int argc, char *argv[]) {
