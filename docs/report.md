@@ -27,7 +27,6 @@ header-includes:
 ---
 
 <!--
-
 assignment: https://www.complang.tuwien.ac.at/anton/lvas/effizienz-aufgabe24/
 
 based on: https://github.com/sueszli/fast-snek
@@ -41,14 +40,21 @@ prof anmerkungen:
 - und unsere präsi muss etwas kompakter sein, weil wir den algo erklären müssen und die benotung ist eig solely based auf die präsi haha
 -->
 
-In October 2024, for the first time Python overtook JavaScript as the most popular language on Github's Octoverse[^octo]. This is a testament to Python's versatility and ease of use, making it an ideal choice for scripting and prototyping. However, the language's simplicity comes at a cost: It is notoriously slow for compute-bound tasks due to the Global Interpreter Lock (GIL)[^gil]. This lock (in the most popular implementation, CPython) prevents multiple native threads from executing Python bytecodes simultaneously, effectively limiting the language's performance on multi-core systems[^bench]. This limitation has led to the development of various workarounds, such as sub-interpreters, multiprocessing, and C extensions, to circumvent the GIL and improve performance - or even remove it entirely, as proposed in PEP 703[^pep703], which was accepted in Python 3.13 and is currently in the experimental stage. This project aims to investigate the performance of GIL-free Python for compute-bound tasks and compare it to alternative approaches.
+#### Python is really popular.
+
+In October 2024, for the first time Python overtook JavaScript as the most popular language on Github's Octoverse[^octo]. This is a testament to Python's versatility and ease of use, making it an ideal choice for scripting and prototyping. However, the language's simplicity comes at a cost: It is notoriously slow for compute-bound tasks due to the Global Interpreter Lock (GIL)[^gil]. This lock (in the most popular implementation, CPython) prevents multiple native threads from executing Python bytecodes simultaneously, effectively limiting the language's performance on multi-core systems[^bench]. This limitation has led to the development of various workarounds, such as sub-interpreters, multiprocessing, and C extensions, to circumvent the GIL and improve performance - or even remove it entirely, as proposed in PEP 703[^pep703], which was accepted in Python 3.13 and is currently in the experimental stage.
+
+#### Why is there a GIL in Python?
+
+This begs the question: Why was the GIL introduced in the first place, and how does it affect Python's performance? According to Larry Hastings[^larry], using the GIL in CPython is on
 
 [^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
 [^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
 [^bench]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html
 [^pep703]: https://peps.python.org/pep-0703/
+[^larry]: https://www.youtube.com/watch?v=KVKufdTphKs&t=731s
 
-# What's a GIL?
+<!-- This project aims to investigate the performance of GIL-free Python for compute-bound tasks and compare it to alternative approaches. -->
 
 Motivation:
 
