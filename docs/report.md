@@ -2,6 +2,7 @@
 title: "Group 7: GIL-free Python"
 subtitle: "Code: [`github.com/sueszli/nogil`](https://github.com/sueszli/nogil)"
 output: pdf_document
+fontsize: 9pt
 documentclass: article
 papersize: a4
 pagestyle: empty
@@ -15,17 +16,14 @@ header-includes:
     - \usepackage{titling}
     - \setlength{\droptitle}{-15pt}
     - \pretitle{\vspace{-30pt}\begin{center}\LARGE}
-    - \posttitle{\end{center}\vspace{-70pt}}    
-    # content
-    - \usepackage{scrextend}
-    - \changefontsizes[8pt]{8pt}
+    - \posttitle{\end{center}\vspace{-50pt}}    
     # code
     - \usepackage{fancyvrb}
-    - \fvset{fontsize=\fontsize{6pt}{6pt}\selectfont}
+    - \fvset{fontsize=\fontsize{8pt}{8pt}\selectfont}
     - \usepackage{listings}
-    - \lstset{basicstyle=\fontsize{6pt}{6pt}\selectfont\ttfamily}
+    - \lstset{basicstyle=\fontsize{8pt}{8pt}\selectfont\ttfamily}
     # code output
-    - \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\fontsize{6pt}{6pt}}
+    - \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\fontsize{8pt}{8pt}}
 ---
 
 <!--
@@ -43,7 +41,14 @@ prof anmerkungen:
 - und unsere präsi muss etwas kompakter sein, weil wir den algo erklären müssen und die benotung ist eig solely based auf die präsi haha
 -->
 
-# Motivation
+In October 2024, for the first time Python overtook JavaScript as the most popular language on Github's Octoverse[^octo]. This is a testament to Python's versatility and ease of use, making it an ideal choice for scripting and prototyping. However, the language's simplicity comes at a cost: It is notoriously slow for compute-bound tasks due to the Global Interpreter Lock (GIL)[^gil]. This lock (in the most popular implementation, CPython) prevents multiple native threads from executing Python bytecodes simultaneously, effectively limiting the language's performance on multi-core systems[^bench]. This limitation has led to the development of various workarounds, such as sub-interpreters, multiprocessing, and C extensions, to circumvent the GIL and improve performance - or even remove it entirely, as proposed in PEP 703[^pep703], which was accepted in Python 3.13 and is currently in the experimental stage. This project aims to investigate the performance of GIL-free Python for compute-bound tasks and compare it to alternative approaches.
+
+[^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
+[^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
+[^bench]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html
+[^pep703]: https://peps.python.org/pep-0703/
+
+# What's a GIL?
 
 Motivation:
 
@@ -94,7 +99,7 @@ Docker with Python 3.13t experimental build
 
 # Addendum
 
-### System Specifications
+All experiments were conducted on a consumer-grade laptop with the following specifications:
 
 ```
 $ system_profiler SPSoftwareDataType SPHardwareDataType
