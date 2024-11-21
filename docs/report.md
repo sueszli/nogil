@@ -29,53 +29,33 @@ header-includes:
 <!--
 assignment: https://www.complang.tuwien.ac.at/anton/lvas/effizienz-aufgabe24/
 
-based on: https://github.com/sueszli/fast-snek
-
-prof anmerkungen:
-
-- also ich glaub wir können es so machen wie wir wollen, es geht im vor allem dass er sieht dass wir was gelernt und verstanden haben und seine optimierungen umgesetzt haben
-- es muss nicht C sein
-- haben aber den Freiraum uns auszutoben solange wir es erklären können was wir gemacht haben
-- als metrics sollten wir jedoch auf das was in der angabe ist setzen, also cycles und so
-- und unsere präsi muss etwas kompakter sein, weil wir den algo erklären müssen und die benotung ist eig solely based auf die präsi haha
+18min presentation
 -->
 
-<!-- Python is really popular. -->
+In October 2024, Python surpassed JavaScript for the first time as the most popular language on GitHub's Octoverse[^octo]. This high-level, interpreted, garbage-collected and dynamically-typed language emphasizes code readability and simplicity both in its implementation and syntax. This emphasis on simplicity also reflects itself in the language's community, often referred to as the "Pythonic" way of doing things.
 
-In October 2024, for the first time Python overtook JavaScript as the most popular language on Github's Octoverse[^octo]. This is a testament to Python's versatility and ease of use, making it an ideal choice for scripting and prototyping. 
+However, the language's simplicity comes at a cost: While memory and network-bound tasks can be efficiently managed through colored functions[^color] and `asyncio`, Python is notoriously slow for compute-bound tasks due to the Global Interpreter Lock (GIL)[^gil].
+The GIL is a mutex in Python's most popular implementation, CPython, that protects access to Python objects, preventing multiple threads from executing Python bytecodes simultaneously and therefore limits the language's performance on multi-core systems.
 
-[^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
+Or as Rob Pike put it in 2012[^go]:
 
-<!-- Why is the GIL a problem? -->
+> *"The computing landscape today is almost unrelated to the environment in which the languages being used, mostly C++, Java, and Python, had been created. The problems introduced by multicore processors, networked systems, massive computation clusters, and the web programming model were being worked around rather than addressed head-on. Moreover, the scale has changed: today's server programs comprise tens of millions of lines of code, are worked on by hundreds or even thousands of programmers, and are updated literally every day. To make matters worse, build times, even on large compilation clusters, have stretched to many minutes, even hours."*
 
-However, the language's simplicity comes at a cost: It is notoriously slow for compute-bound tasks due to the Global Interpreter Lock (GIL)[^gil]. The GIL is a mutex in Python's most popular implementation, CPython, that protects access to Python objects, preventing multiple threads from executing Python bytecodes simultaneously and therefore limits the language's performance on multi-core systems[^bench].
+These limitations have led to the development of various workarounds, such as the development of competing superset languages such as the `taichi`[^taichi] and `mojo`[^mojo], optimizing Python interpreters like `PyPy`[^pypy] and `Numba`[^numba], proposing to introduce multiple lightweight sub-interpreters[^subint1] [^subint2], or even making the GIL entirely optional[^nogil1] [^nogil2] [^nogil3], as proposed in PEP 703[^pep703].
 
-> "The computing landscape today is almost unrelated to the environment in which the languages being used, mostly C++, Java, and Python, had been created. The problems introduced by multicore processors, networked systems, massive computation clusters, and the web programming model were being worked around rather than addressed head-on. Moreover, the scale has changed: today's server programs comprise tens of millions of lines of code, are worked on by hundreds or even thousands of programmers, and are updated literally every day. To make matters worse, build times, even on large compilation clusters, have stretched to many minutes, even hours." - Rob Pike[^go]
+The latter approach, making the GIL optional, was recently accepted in Python 3.13 and is currently in the experimental stage. There is no guarantee of this feature being included in the final release, but it is a step in the right direction.
 
-[^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
-[^go]: https://go.dev/talks/2012/splash.article
-[^bench]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html
+In the past, parallelizing Python code was primarily achieved through the `multiprocessing` module, which, while effective, comes with significant drawbacks: it lacks shared memory support and consumes more resources compared to threading. 
 
-This limitation has led to the development of various workarounds, such as sub-interpreters, multiprocessing, and C extensions, to circumvent the GIL and improve performance - or even remove it entirely, as proposed in PEP 703[^pep703], which was accepted in Python 3.13 and is currently in the experimental stage.
+The introduction of a GIL-free Python has raised hopes for more efficient parallelization. However, it's critical to recognize that Python’s inherently dynamic nature and the overhead of its interpreter limit its performance far beyond the GIL. Even with these improvements, Python remains significantly slower - often by a factor of 1000 or more - compared to statically-typed systems languages[^bench].
 
-The reason it hasn't been removed so far is that it would make the code base harder to maintain, reduce single threaded performance, break backwards compatibility and is possibly what made python the popular language it is today to begin with.
+This begs the question: why has Python become so dominant in scientific computing? The answer lies in its role as a high-level orchestration tool. In this domain, computational bottlenecks are offloaded to libraries written in optimized languages like C or Fortran, while Python acts as a glue language. This design is so entrenched that systems engineers frequently use macros to embed C code directly into Python[^nogildocs].
 
-Larry Hastings[^larry] 
+Recent developments in Python's concurrency capabilities, such as the removal of the GIL, are therefore not a revolution in raw performance but an enhancement in convenience. They make it easier for developers to write efficient code, especially for tasks that can benefit from parallel execution, without fundamentally altering Python's comparative speed limitations.
 
+In this report, we will explore the optimization of a compute-bound task in Python across varying levels of abstraction. We will analyze the trade-offs between performance and usability, shedding light on how Python's evolving capabilities can be leveraged effectively.
 
-[^pep703]: https://peps.python.org/pep-0703/
-[^larry]: https://www.youtube.com/watch?v=KVKufdTphKs&t=731s
-
-
-Motivation:
-
-- Memory/Network-bound tasks: Asynchronous I/O with `asyncio`, very competitive.
-- Compute-bound tasks: Very slow interpreter, hard to parallelize with GIL. → recently removed in PEP 703
-
-Research question:
-
-- How useful is GIL-free Python for compute-bound tasks?
-- How does it compare to alternatives (multiprocessing, C-Python interopt, C-Python extensions)?
+#### Let's find out how they work.
 
 Chosen algorithm: hashcat
 
@@ -184,3 +164,21 @@ Vulnerability Tsx async abort:        Not affected
 Flags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 asimddp sha512 asimdfhm dit uscat
                                        ilrcpc flagm ssbs sb paca pacg dcpodp flagm2 frint
 ```
+
+
+[^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
+[^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
+[^color]: https://langdev.stackexchange.com/questions/3430/colored-vs-uncolored-functions
+[^go]: https://go.dev/talks/2012/splash.article
+[^bench]: https://benchmarksgame-team.pages.debian.net/benchmarksgame/index.html
+[^taichi]: https://www.taichi-lang.org/
+[^mojo]: https://docs.modular.com/mojo/stdlib/python/python.html
+[^pypy]: https://www.pypy.org/
+[^numba]: https://numba.pydata.org/
+[^pep703]: https://peps.python.org/pep-0703/
+[^subint1]: https://peps.python.org/pep-0554/
+[^subint2]: https://peps.python.org/pep-0683/
+[^nogil1]: https://peps.python.org/pep-0703/
+[^nogil2]: https://discuss.python.org/t/a-steering-council-notice-about-pep-703-making-the-global-interpreter-lock-optional-in-cpython/30474
+[^nogil3]: https://engineering.fb.com/2023/10/05/developer-tools/python-312-meta-new-features/
+[^nogildocs]: https://docs.python.org/3/c-api/init.html#releasing-the-gil-from-extension-code
