@@ -1,4 +1,4 @@
-Report: https://sueszli.github.io/nogil/docs/report.pdf
+# Check out [NOGIL: Breaking free from the GIL](https://sueszli.github.io/nogil/docs/report.pdf) 🔥
 
 Usage:
 
