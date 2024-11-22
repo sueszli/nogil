@@ -179,16 +179,10 @@ Hardware:
 
       Model Name: MacBook Pro
       Model Identifier: Mac14,10
-      Model Number: Z174001ABD/A
+      Model Number: <redacted>
       Chip: Apple M2 Pro
       Total Number of Cores: 12 (8 performance and 4 efficiency)
       Memory: 16 GB
-      System Firmware Version: 10151.140.19
-      OS Loader Version: 10151.140.19
-      Serial Number (system): VCYQD0HH0G
-      Hardware UUID: BEA4D09D-6651-54E1-A3F7-7FB78A7BF1AB
-      Provisioning UDID: 00006020-001A284901E8C01E
-      Activation Lock Status: Disabled
 ```
 
 ```
