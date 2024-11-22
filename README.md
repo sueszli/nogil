@@ -1,4 +1,6 @@
-usage:
+Check out the report: 
+
+Usage:
 
 ```bash
 # 
