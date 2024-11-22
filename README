@@ -1,4 +1,29 @@
-# Check out [NOGIL: Breaking free from the GIL](https://sueszli.github.io/nogil/docs/report.pdf) 🔥
+    Y
+  .-^-.
+ /     \      .- ~ ~ -.    pssssss...
+()     ()    /   _ _   `.                     _ _ _
+ \_   _/    /  /     \   \                . ~  _ _  ~ .
+   | |     /  /       \   \             .' .~       ~-. `.
+   | |    /  /         )   )           /  /             `.`.
+   \ \_ _/  /         /   /           /  /                `'
+    \_ _ _.'         /   /           (  (
+                    /   /             \  \
+                   /   /               \  \    psssss.....
+                  /   /                 )  )
+                 (   (                 /  /
+                  `.  `.             .'  /
+                    `.   ~ - - - - ~   .'
+                       ~ . _ _ _ _ . ~
+
+Report: https://sueszli.github.io/nogil/docs/report.pdf
+
+File tree:
+
+- `src/0_plain`: plain python implementations of hashcat
+- `src/1_multiprocessing`: multiprocessing implementations
+- `src/2_multithreading`: multithreading implementations with the GIL enabled/disabled
+- `src/3_ctypes`: ctypes implementations, some using OpenMP
+- `src/4_cpython`: cpython implementations, based on the C API of CPython
 
 Usage:
 
