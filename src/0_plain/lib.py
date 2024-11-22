@@ -3,12 +3,9 @@ def hashcat(target_hash, max_length=8):
     import string
     from itertools import product
 
-    alphabet = string.ascii_letters + string.digits
     for length in range(1, max_length + 1):
-        guesses = ("".join(guess) for guess in product(alphabet, repeat=length))
-        for password in guesses:
-            hashed = hashlib.sha1(password.encode()).hexdigest()
-            if hashed == target_hash:
+        for password in ("".join(guess) for guess in product(string.ascii_letters + string.digits, repeat=length)):
+            if target_hash == hashlib.sha1(password.encode()).hexdigest():
                 return password
     return None
 

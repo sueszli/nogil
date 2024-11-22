@@ -1,5 +1,5 @@
 ---
-title: "Group 7: GIL-free Python"
+title: "Breaking free from the GIL"
 subtitle: "Code: [`github.com/sueszli/nogil`](https://github.com/sueszli/nogil)"
 output: pdf_document
 fontsize: 9pt
@@ -55,17 +55,72 @@ Recent developments in Python's concurrency capabilities, such as the removal of
 
 In this report, we will explore the optimization of a compute-bound task in Python across varying levels of abstraction. We will analyze the trade-offs between performance and usability, shedding light on how Python's evolving capabilities can be leveraged effectively.
 
-#### Let's find out how they work.
+# 1. Algorithm: Naive Brute-Force Collision Attack
 
-Chosen algorithm: hashcat
+The embarrassingly parallel algorithm we have selected to demonstrate our optimizations, particularly the GIL-free multithreaded implementation, to put in contrast with the alternatives is a brute-force password cracker, most popular from the open-source library `hashcat`. The algorithm is simple: given a target hash, from a given character set and a maximum password length, the cracker generates all possible passwords and hashes them using the same algorithm. If the generated hash matches the target hash, the password is found and the program terminates.
 
-- on password storage: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
-- we use a simpler one
-- no algorithmic optimizations (e.g. rainbow tables, bloom filters, etc.) just brute-force
+To formalize, we define: character set $C$, maximum password length $n$, target hash value $h_{target}$, and hash function $H(x)$. 
 
-Cpython dependency `Python.h`: https://github.com/python/cpython/blob/main/Include/Python.h
+The search space $S$ can be expressed as $S = \bigcup_{i=1}^n C^i$ where $C^i$ represents all possible strings of length $i$ from character set $C$. The problem can then be formulated as finding $p \in S$ such that: $H(p) = h_{target}$ and the total search space size is $|S| = \sum_{i=1}^n |C|^i$.
 
-# Experiments
+For parallel processing, we can partition $S$ into $k$ subsets: $S = \bigcup_{j=1}^k S_j$ where each $S_j$ can be processed independently by different threads.
+
+To simplify the problem, we have chosen a small character set $C = \{a, \ldots z\}$ and a small maximum password length $n = 8$. The target hash value is set to `aaa` for simplicity. More sophisticated attacks would also consider the possibility of salted hashes, which we have omitted for brevity as well as clever algorithmic optimizations like bloom filters, rainbow tables, etc. which are beyond the scope of this report.
+
+In initial experiments, we self-implemented 3 distinct hash functions $H(x)$ in Python, namely md5, sha1, and sha256, in plain Python to compare both the simplicity and security of the hash functions against our "collision attack". It's worth noting that none of these hash functions are considered secure for password hashing[^hash].
+
+- `md5`: ~100 LoC, max 9847.03 hashes per second
+- `sha1`: ~40 LoC, max 18578.26 hashes per second (approx. half as fast as the hashlib implementation)
+- `sha256`: ~50 LoC, max 7870.21 hashes per second
+
+To validate the correctness of our implementations, we have cross-validated the results with the `hashlib` library in Python. Due to the slow performance of any implementation other than our thoroughly optimized `sha1` implementation, we have decided to use it for the remainder of our experiments - unless otherwise noted.
+
+# 2. Methodology: Different Levels of Abstraction
+
+To benchmark our experiments with the experimental GIL-free CPython version 13t (threaded), we implemented a Docker container that builds Python from source and sets the correct compile flags to disable the GIL. The container additionally serves to increase isolation and the reproducibility of our experiments.
+
+#### 1) Plain Python
+
+The most straightforward implementation of the brute-force attack is a simple loop that iterates over all possible passwords and hashes them. We have implemented this in three different ways: (1) completely free of any libraries, (2) using the `itertools` library to improve succinctness and (3) using the `hashlib` library for hashing (in just 4 LoC).
+
+#### 2) Multiprocessing
+
+The `multiprocessing` module in Python allows for parallel processing by creating separate processes for each task. We have implemented the brute-force attack using the `map`, `imap`, `map_async`, and `imap_unordered` functions to compare the performance of different parallelization strategies. We omitted the `starmap` function as it is just syntactic sugar for `map` and the Executor API as the overhead of creating a new process for each task is too high.
+
+When using the `multiprocessing` library in Python, we can call multiple system processes that each come with their own separate Python interpreter, GIL, and memory space. This is very simple, straightforward, and the intended way to write parallel code in the latest Python version. But it comes with all the pros and cons of using processes for parallel programming:
+
+- Simple, has higher isolation, security and robustness.
+- Context switching: actually doesn't matter, since the threading library threads are kernel-level as well.
+- Resource overhead: memory allocation, creation, and management are slower for processes. Additionally, having a unique copy of the interpreter for each process is really wasteful.
+- Serialization overhead: there is no shared memory, so data has to be serialized and deserialized for inter-process communication. Also, some objects are unserializable: the pickle module is used to serialize objects. But some objects are not pickleable (i.e. lambdas, file handles, etc.).
+
+#### 3) Multithreading
+
+The `threading` module in Python allows for parallel processing by creating separate threads for each task. With the GIL-free Python, this level of abstraction is expected to experience the most significant performance improvements. We have implemented the brute-force attack using the `ThreadPoolExecutor` and `Thread` classes to compare the performance of different parallelization strategies. While the `ThreadPoolExecutor` is more convenient, the `Thread` class allows for more fine-grained control over the threads and resembles the join API of C more closely.
+
+When using the `threading` library in Python with the GIL released using the `GIL=0` flag, we achieve the lowest overhead and the highest performance of any pure Python implementation for parallel processing.
+
+#### 4) ctypes
+
+CTypes is a foreign function interface (FFI) for Python that allows calling functions from shared libraries.
+
+We initially implemented our own optimized Sha1 implementation in C, but noticed that it performs almost identically to the `openssl/sha.h` implementation. We have therefore decided to use the more robust implementation instead to reduce complexity in our experiments. We conducted two experiments: one in plain C and one using OpenMP to parallelize the hashing function.
+
+This method is the most straightforward way to call C code from Python and requires close to no knowledge of the Python C API[^cpython]. The GIL is released automatically on each foreign function call. However, it comes with massive serialization overhead as automatic type conversions done by the FFI-library are very expensive. This can be partially circumvented by passing pointers or using CFFI but it will still be significantly slower than extending CPython. Ideally one should share as little data, pass as little data and call the foreign function as little as possible.
+
+We did so by only passing the target hash $h_{target}$ to the C function and returning the password if it matches.
+
+Ctypes aren't meant to be used for high performance libraries that you use frequently but codebase-glue. you can still use them for that purpose and gain a significant amount of performance, but you have to move as much of the computation as possible into the C implementation.
+
+#### 5) CPython
+
+Finally, we have implemented the brute-force attack by extending the CPython interpreter directly. Given our lessons from previous experiments, we have decided to use the `openssl/sha.h` implementation for hashing and leave out the OpenMP parallelization.
+
+Extending CPython has neglible to no overhead and allows to share large chunks of memory by calling `mmap()` directly. However, it comes with a very complex API and requires you to manually manage the GIL with `Py_BEGIN_ALLOW_THREADS` and `Py_END_ALLOW_THREADS` macros and marshal all data passed between the C and Python code. It also isn't portable and requires a lot of boilerplate code to build and distribute.
+
+# 3. Results
+
+We achieved a ~6x speedup of the plain python implementation, even marginally outperforming the `hashlib.sha1` library.
 
 ![Performance Overview](docs/assets/perf.png){ width=100% }
 
@@ -86,13 +141,16 @@ Cpython dependency `Python.h`: https://github.com/python/cpython/blob/main/Inclu
 |ctypes: invoke_hashcat.py (openmp) | 0.1021338| 0.0056378| 0.1003631| 0.0986943| 0.0083828| 0.0976012| 0.1269725|
 |cpython: invoke_hashcat.py         | 0.1006056| 0.0043579| 0.0997623| 0.0950439| 0.0052310| 0.0943297| 0.1081794|
 
-Target hash: `aaa`
+Each experiment was conducted with 3 warmup runs using the `hyperfine` library. The following observations can be made:
 
-Warmup: 3 runs
+- The fastest GIL-enabled parallelization using `imap_unordered` achieved a ~2.5x speedup over the plain python implementation.
+- The fastest GIL-free parallelization implementation, individually managing threads, managed to shave off another ~0.06s, achieving a ~3.4x speedup over the plain python implementation.
+- The overhead induced by OpenMP made it an unviable option for parallelization in our case.
+- The ctypes implementation outperformed the extension of CPython directly and achieved a ~6x speedup over the plain python implementation, even marginally outperforming the usage of the `hashlib.sha1` library in plain Python.
 
-Docker with Python 3.13t experimental build
+Our findings, while insightful, are limited in their generalizability due to the simplicity of the experiments, the overhead introduced by containerization and various implicit assumptions about the underlying hardware and software environment. Nonetheless, this report serves as both a proof of concept and a practical guide for engineering parallelized Python code across different abstraction levels. It highlights the trade-offs between performance, complexity and usability.
 
-
+Crucially, we demonstrate that significant performance gains can be achieved by leveraging Python's robust ecosystem and its efficient bindings to C libraries. For instance, a mere four lines of Python code using the `hashlib.sha1` library outperformed several of our more intricate C implementations. This underscores the remarkable efficiency of Python's ecosystem and the importance of focusing on high-level optimization strategies—leveraging well-optimized libraries rather than reinventing the wheel.
 
 # Addendum
 
@@ -165,7 +223,6 @@ Flags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32
                                        ilrcpc flagm ssbs sb paca pacg dcpodp flagm2 frint
 ```
 
-
 [^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
 [^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
 [^color]: https://langdev.stackexchange.com/questions/3430/colored-vs-uncolored-functions
@@ -182,3 +239,5 @@ Flags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32
 [^nogil2]: https://discuss.python.org/t/a-steering-council-notice-about-pep-703-making-the-global-interpreter-lock-optional-in-cpython/30474
 [^nogil3]: https://engineering.fb.com/2023/10/05/developer-tools/python-312-meta-new-features/
 [^nogildocs]: https://docs.python.org/3/c-api/init.html#releasing-the-gil-from-extension-code
+[^hash]: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+[^cpython]: https://github.com/python/cpython/blob/main/Include/Python.h
