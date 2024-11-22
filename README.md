@@ -1,4 +1,4 @@
-Check out the report: 
+Report: https://sueszli.github.io/nogil/docs/report.pdf
 
 Usage:
 
