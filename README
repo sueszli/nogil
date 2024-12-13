@@ -26,7 +26,7 @@ File tree:
 - `src/4_cpython`: cpython implementations, based on the C API of CPython
 - `benchmark.sh`: non-portable benchmarking script using `perf`
 
-Usage:
+Evaluation:
 
 ```bash
 # 
@@ -81,9 +81,7 @@ docker compose exec main gcc -shared -fopenmp -o ./src/4_cpython/hashcatmodule.s
 docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.csv "python ./src/4_cpython/invoke_hashcat.py ./src/3_ctypes/libhashcat_openmp.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
 ```
 
-# 
-# cycle benchmark
-# 
+# Advanced Evaluation
 
 We also measure cycles, instructions and runtime in the `benchmark.sh` script. However, it isn't portable and requires an amd64 architecture for execution.
 
