@@ -79,3 +79,28 @@ docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.
 docker compose exec main gcc -shared -fopenmp -o ./src/4_cpython/hashcatmodule.so -fPIC -I/usr/local/include/python3.13t ./src/4_cpython/hashcat.c -lcrypto -lssl
 docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.csv "python ./src/4_cpython/invoke_hashcat.py ./src/3_ctypes/libhashcat_openmp.so 7e240de74fb1ed08fa08d38063f6a6a91462a815" && tail -n +2 tmp.csv >> results.csv
 ```
+
+# 
+# performance measures 
+# 
+We provide the script `benchmark.sh` to run the benchmarks. It will execute 30 runs of each implementation and use perf to measure metrics like cycles, instructions, and execution time. This is however only usable within Linux systems.
+To us it, do the following:
+
+1. *Set the Python Binary*:
+   Update `PYTHON_BIN` in the script to point to the correct Python executable, e.g.:
+   ```bash
+   PYTHON_BIN="python3.13-nogil"
+   ```
+
+2. *Compile Required Libraries*:
+   Run these commands in the Docker container to compile the necessary shared libraries:
+   ```bash
+   docker compose exec main gcc -shared -fopenmp -o ./src/4_cpython/hashcatmodule.so -fPIC -I/usr/local/include/python3.13t ./src/4_cpython/hashcat.c -lcrypto -lssl
+   docker compose exec main gcc -fopenmp -fPIC -shared -o ./src/3_ctypes/libhashcat_openmp.so ./src/3_ctypes/hashcat_openmp.c -lcrypto -lssl
+   docker compose exec main gcc -fopenmp -fPIC -shared -o ./src/3_ctypes/libhashcat.so ./src/3_ctypes/hashcat.c -lcrypto -lssl
+   ```
+3. *Run the Benchmark*:
+   Run the benchmark script:
+   ```bash
+   ./benchmark.sh
+   ```
