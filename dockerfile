@@ -16,6 +16,7 @@ RUN set -eux; \
 		ca-certificates \
 		netbase \
 		tzdata \
+		linux-perf \
 	; \
 	rm -rf /var/lib/apt/lists/*
 
@@ -48,6 +49,7 @@ RUN set -eux; \
 		wget \
 		xz-utils \
 		zlib1g-dev \
+		linux-perf \
 	; \
 	\
 	wget -O python.tar.xz "https://www.python.org/ftp/python/${PYTHON_VERSION%%[a-z]*}/Python-$PYTHON_VERSION.tar.xz"; \

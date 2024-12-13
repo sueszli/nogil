@@ -1,13 +1,13 @@
 def check_password_chunk(args):
-    import hashlib
+    from utils import sha1
 
     chunk, target_hash = args
     for password in chunk:
-        hashed = hashlib.sha1(password.encode()).hexdigest()
+        hashed = sha1(password.encode()).hex()
+
         if hashed == target_hash:
             return password
     return None
-
 
 def hashcat(target_hash, max_length=8, num_threads=8):
     import string

@@ -1,5 +1,5 @@
 def worker(queue, target_hash, found_event, result_queue):
-    import hashlib
+    from utils import sha1
     from queue import Queue
 
     while not found_event.is_set():
@@ -12,7 +12,7 @@ def worker(queue, target_hash, found_event, result_queue):
                 if found_event.is_set():
                     break
 
-                hashed = hashlib.sha1(password.encode()).hexdigest()
+                hashed = sha1(password.encode()).hex()
                 if hashed == target_hash:
                     result_queue.put(password)
                     found_event.set()
