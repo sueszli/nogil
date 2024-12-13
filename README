@@ -85,7 +85,7 @@ docker compose exec main /root/.cargo/bin/hyperfine --warmup 3 --export-csv tmp.
 # cycle benchmark
 # 
 
-We also measure cycles, instructions and runtime in the `benchmark.sh` script. however, it isn't portable and requires an amd64 architecture.
+We also measure cycles, instructions and runtime in the `benchmark.sh` script. However, it isn't portable and requires an amd64 architecture for execution.
 
 - 1) update the python binary path in the script at the variable `PYTHON_BIN`. for example: `PYTHON_BIN="python3.13-nogil"`
 - 2) compile the cpython extension binaries:
