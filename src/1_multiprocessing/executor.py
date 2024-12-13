@@ -4,10 +4,9 @@ too slow, each run takes multiple seconds
 
 
 def hash_password(password):
-    from hashlib import sha1
+    from utils import sha1
 
-    return password, sha1(password.encode()).hexdigest()
-
+    return password, sha1(password.encode()).hex()
 
 def hashcat(target_hash, max_length=8):
     import concurrent.futures

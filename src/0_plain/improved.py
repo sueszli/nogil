@@ -17,10 +17,10 @@ def sha1(msg):
             (chunk[j] << 24) | (chunk[j + 1] << 16) | (chunk[j + 2] << 8) | chunk[j + 3]
             for j in range(0, 64, 4)
         ]
-        w.extend([0] * (80 - 16))
+
         for j in range(16, 80):
             value = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16]
-            w[j] = ((value << 1) & 0xFFFFFFFF) | (value >> 31)
+            w.append(((value << 1) & 0xFFFFFFFF) | (value >> 31))
 
         a, b, c, d, e = h
         for j in range(20):
@@ -50,16 +50,27 @@ def sha1(msg):
 
 
 def hashcat(target_hash, max_length=8):
-    import string
-    from itertools import product
+    alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    position = [0] * max_length
 
-    alphabet = string.ascii_letters + string.digits
     for length in range(1, max_length + 1):
-        guesses = ("".join(guess) for guess in product(alphabet, repeat=length))
-        for password in guesses:
-            hashed = sha1(password.encode()).hex()
+        while True:
+            current = "".join(alphabet[position[i]] for i in range(length))
+            hashed = sha1(current).hex()
             if hashed == target_hash:
-                return password
+                return current
+
+            idx = 0
+            while idx < length:
+                position[idx] += 1
+                if position[idx] < len(alphabet):
+                    break
+                position[idx] = 0
+                idx += 1
+
+            if idx == length:
+                break
+
     return None
 
 
