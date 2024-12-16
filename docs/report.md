@@ -127,15 +127,7 @@ Extending CPython has neglible to no overhead and allows to share large chunks o
 
 # 3. Results
 
-We beat the `hashlib` standard library by 13.525 ns or 101703681.5 instructions. This was achieved using the `ctypes` library and the CPython-C-API.
-
-Disabling the GIL while manually managing threads with the `multithreading` API showed a massive speedup, achieved by reducing the median time spent in system mode by 42x. However, the single threaded version was still faster. 
-
-![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
-
-![Median task clock per command](docs/assets/task_clock_median.png){ width=100% }
-
-![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% }
+We beat `hashlib` by 13.525ns (2.5x) or 101,703,681 instructions (3.3x). This was achieved through the `ctypes` library, CPython-C-API and various C libraries.
 
 |gil   |type            |command                                | instructions (med)| task_clock (med) | user_time (med)| sys_time (med) |
 |:-----|:---------------|:--------------------------------------|-------------------:|-----------------:|----------------:|---------------:|
@@ -154,6 +146,16 @@ Disabling the GIL while manually managing threads with the `multithreading` API 
 |false |multithreading  |executor.py                            |        241749347062|         63354.890|       63.2586825|       0.0327220|
 |true  |multiprocessing |map_async.py                           |        244913585430|         61218.555|       61.0370955|       0.2066270|
 |true  |multiprocessing |map.py                                 |        245013383854|         61259.295|       61.0844710|       0.2048880|
+
+More importantly, disabling the GIL while individually managing threads with the `multithreading` API reduced time spent on syscalls by 42x. This shows that the GIL is a significant bottleneck for parallel computing in Python. Nonetheless, the single threaded implementation invoking the `hashlib` library, our `ctypes` implementation or the CPython extension are most likely the best choice for most performance critical applications.
+
+These insights provide a valuable foundation for future work in optimizing Python performance and offer practical guidance for developers seeking to enhance the efficiency of their applications.
+
+![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
+
+![Median task clock per command](docs/assets/task_clock_median.png){ width=100% }
+
+![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% }
 
 <!--
 
