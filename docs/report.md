@@ -157,75 +157,16 @@ These insights provide a valuable foundation for future work in optimizing Pytho
 
 ![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% }
 
-<!--
-
 # Addendum
 
 All experiments were conducted on a consumer-grade laptop with the following specifications:
 
 ```
-$ system_profiler SPSoftwareDataType SPHardwareDataType
-
-Software:
-
-    System Software Overview:
-
-      System Version: macOS 14.6.1 (23G93)
-      Kernel Version: Darwin 23.6.0
-      Boot Volume: Macintosh HD
-      Boot Mode: Normal
-      Computer Name: Yahya’s MacBook Pro
-      User Name: Yahya Jabary (sueszli)
-      Secure Virtual Memory: Enabled
-      System Integrity Protection: Enabled
-      Time since boot: 79 days, 22 hours, 26 minutes
-
-Hardware:
-
-    Hardware Overview:
-
-      Model Name: MacBook Pro
-      Model Identifier: Mac14,10
-      Model Number: <redacted>
-      Chip: Apple M2 Pro
-      Total Number of Cores: 12 (8 performance and 4 efficiency)
-      Memory: 16 GB
+Processor: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz   2.80 GHz
+RAM: 16,0 GB (15,7 GB usable)
+Windows 10 Pro - Version 22H2
+Python 3.13
 ```
-
-```
-$ docker compose exec main lscpu
-
-Architecture:                         x86_64
-CPU op-mode(s):                       32-bit
-Byte Order:                           Little Endian
-CPU(s):                               12
-On-line CPU(s) list:                  0-11
-Thread(s) per core:                   1
-Core(s) per socket:                   12
-Socket(s):                            1
-Vendor ID:                            0x61
-Model:                                0
-Stepping:                             0x0
-BogoMIPS:                             48.00
-Vulnerability Gather data sampling:   Not affected
-Vulnerability Itlb multihit:          Not affected
-Vulnerability L1tf:                   Not affected
-Vulnerability Mds:                    Not affected
-Vulnerability Meltdown:               Not affected
-Vulnerability Mmio stale data:        Not affected
-Vulnerability Reg file data sampling: Not affected
-Vulnerability Retbleed:               Not affected
-Vulnerability Spec rstack overflow:   Not affected
-Vulnerability Spec store bypass:      Mitigation; Speculative Store Bypass disabled via prctl
-Vulnerability Spectre v1:             Mitigation; __user pointer sanitization
-Vulnerability Spectre v2:             Not affected
-Vulnerability Srbds:                  Not affected
-Vulnerability Tsx async abort:        Not affected
-Flags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 asimddp sha512 asimdfhm dit uscat
-                                       ilrcpc flagm ssbs sb paca pacg dcpodp flagm2 frint
-```
-
--->
 
 [^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
 [^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
