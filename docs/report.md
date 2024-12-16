@@ -7,16 +7,17 @@ documentclass: article
 papersize: a4
 pagestyle: empty
 geometry:
-    - top=5mm
-    - bottom=5mm
-    - left=5mm
-    - right=5mm
+    - top=15mm
+    - bottom=15mm
+    - left=15mm
+    - right=15mm
 header-includes:
+    - \pagenumbering{gobble}
     # title
     - \usepackage{titling}
     - \setlength{\droptitle}{-15pt}
     - \pretitle{\vspace{-30pt}\begin{center}\LARGE}
-    - \posttitle{\end{center}\vspace{-50pt}}    
+    - \posttitle{\end{center}\vspace{-30pt}}    
     # code
     - \usepackage{fancyvrb}
     - \fvset{fontsize=\fontsize{8pt}{8pt}\selectfont}
