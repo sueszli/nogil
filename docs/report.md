@@ -25,6 +25,12 @@ header-includes:
     - \lstset{basicstyle=\fontsize{8pt}{8pt}\selectfont\ttfamily}
     # code output
     - \DefineVerbatimEnvironment{verbatim}{Verbatim}{fontsize=\fontsize{8pt}{8pt}}
+    # tables
+    - \usepackage{etoolbox}
+    - \AtBeginEnvironment{longtable}{\footnotesize}
+    - \AtBeginEnvironment{tabular}{\footnotesize}
+    - \setlength{\LTleft}{0pt}
+    - \setlength{\LTright}{0pt}
 ---
 
 <!--
@@ -121,37 +127,34 @@ Extending CPython has neglible to no overhead and allows to share large chunks o
 
 # 3. Results
 
-We achieved a ~6x speedup of the plain python implementation, even marginally outperforming the `hashlib.sha1` library.
+We beat the `hashlib` standard library by 13.525 ns or 101703681.5 instructions. This was achieved using the `ctypes` library and the CPython-C-API.
 
-![Performance Overview](docs/assets/perf.png){ width=100% }
+![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
 
-|command                            |      mean|    stddev|    median|      user|    system|       min|       max|
-|:----------------------------------|---------:|---------:|---------:|---------:|---------:|---------:|---------:|
-|plain: itertools.py                | 0.5674692| 0.0119883| 0.5700655| 0.5599028| 0.0074184| 0.5496380| 0.5865690|
-|plain: lib.py                      | 0.1003698| 0.0026018| 0.0995592| 0.0950988| 0.0051505| 0.0976092| 0.1086287|
-|plain: plain.py                    | 0.5631182| 0.0085463| 0.5607433| 0.5574100| 0.0056163| 0.5564152| 0.5863659|
-|multiprocessing: imap_unordered.py | 0.2258019| 0.0085966| 0.2235880| 0.5456730| 0.1661910| 0.2184310| 0.2449692|
-|multiprocessing: imap.py           | 0.2328316| 0.0065632| 0.2306093| 0.5554529| 0.1625106| 0.2235672| 0.2426373|
-|multiprocessing: map_async.py      | 0.4528332| 0.0248580| 0.4485649| 1.0100400| 0.1108107| 0.4314743| 0.5167882|
-|multiprocessing: map.py            | 0.4400746| 0.0043315| 0.4405771| 0.9853628| 0.1084339| 0.4329375| 0.4467715|
-|multithreading: GIL=1 executor.py  | 0.3696592| 0.0103798| 0.3658508| 0.3597924| 0.0092238| 0.3621005| 0.3968615|
-|multithreading: GIL=0 executor.py  | 0.2102704| 0.0104267| 0.2121045| 0.4389796| 0.0105094| 0.1962787| 0.2321854|
-|multithreading: GIL=1 workers.py   | 0.1304648| 0.0071726| 0.1292655| 0.1178397| 0.0081775| 0.1242261| 0.1582329|
-|multithreading: GIL=0 workers.py   | 0.1677349| 0.0076839| 0.1685633| 0.1931002| 0.0202853| 0.1429964| 0.1760283|
-|ctypes: invoke_hashcat.py          | 0.0934947| 0.0031416| 0.0929726| 0.0882496| 0.0049164| 0.0891827| 0.0996272|
-|ctypes: invoke_hashcat.py (openmp) | 0.1021338| 0.0056378| 0.1003631| 0.0986943| 0.0083828| 0.0976012| 0.1269725|
-|cpython: invoke_hashcat.py         | 0.1006056| 0.0043579| 0.0997623| 0.0950439| 0.0052310| 0.0943297| 0.1081794|
+![Median task clock per command](docs/assets/task_clock_median.png){ width=100% }
 
-Each experiment was conducted with 3 warmup runs using the `hyperfine` library. The following observations can be made:
+![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% }
 
-- The fastest GIL-enabled parallelization using `imap_unordered` achieved a ~2.5x speedup over the plain python implementation.
-- The fastest GIL-free parallelization implementation, individually managing threads, managed to shave off another ~0.06s, achieving a ~3.4x speedup over the plain python implementation.
-- The overhead induced by OpenMP made it an unviable option for parallelization in our case.
-- The ctypes implementation outperformed the extension of CPython directly and achieved a ~6x speedup over the plain python implementation, even marginally outperforming the usage of the `hashlib.sha1` library in plain Python.
+|gil   |type            |command                                | instructions (med)| task_clock (med) | user_time (med)| sys_time (med) |
+|:-----|:---------------|:--------------------------------------|-------------------:|-----------------:|----------------:|---------------:|
+|true  |**cpython**         |**invoke_hashcat.py (openmp)** |            44442376|             8.760|        0.0090265|       0.0000000|
+|true  |ctypes          |invoke_hashcat.py (openmp) |            80107280|            39.820|        0.0160960|       0.0000000|
+|true  |ctypes          |invoke_hashcat.py        |           118592997|            16.110|        0.0162195|       0.0000000|
+|true  |**plain**           |**lib.py (hashlib libary)**                                |           146146058|            22.285|        0.0222055|       0.0000000|
+|false |multithreading  |workers.py                             |           198008716|            39.985|        0.0258195|       0.0113530|
+|true  |multithreading  |workers.py                             |          1030919157|           106.765|        0.1006565|       0.0111120|
+|true  |plain           |itertools.py                           |          3945750392|           325.575|        0.3242800|       0.0000000|
+|true  |plain           |improved.py                            |          3959326962|           322.015|        0.3206755|       0.0000000|
+|true  |plain           |plain.py                               |          4752510454|           400.205|        0.3996415|       0.0000000|
+|true  |multiprocessing |imap.py                                |          6620723294|          1743.685|        1.2987810|       0.4785180|
+|true  |multiprocessing |imap_unordered.py                      |          6692752894|          1787.350|        1.3024570|       0.5340625|
+|true  |multithreading  |executor.py                            |        241741072306|         20136.600|       19.8526395|       0.6276710|
+|false |multithreading  |executor.py                            |        241749347062|         63354.890|       63.2586825|       0.0327220|
+|true  |multiprocessing |map_async.py                           |        244913585430|         61218.555|       61.0370955|       0.2066270|
+|true  |multiprocessing |map.py                                 |        245013383854|         61259.295|       61.0844710|       0.2048880|
 
-Our findings, while insightful, are limited in their generalizability due to the simplicity of the experiments, the overhead introduced by containerization and various implicit assumptions about the underlying hardware and software environment. Nonetheless, this report serves as both a proof of concept and a practical guide for engineering parallelized Python code across different abstraction levels. It highlights the trade-offs between performance, complexity and usability.
+Disabling the GIL while manually managing the threads and memory using the `multithreading` API also showed very promising results.
 
-Crucially, we demonstrate that significant performance gains can be achieved by leveraging Python's robust ecosystem and its efficient bindings to C libraries. For instance, a mere four lines of Python code using the `hashlib.sha1` library outperformed several of our more intricate C implementations. This underscores the remarkable efficiency of Python's ecosystem and the importance of focusing on high-level optimization strategies—leveraging well-optimized libraries rather than reinventing the wheel.
 
 # Addendum
 
