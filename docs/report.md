@@ -129,6 +129,8 @@ Extending CPython has neglible to no overhead and allows to share large chunks o
 
 We beat the `hashlib` standard library by 13.525 ns or 101703681.5 instructions. This was achieved using the `ctypes` library and the CPython-C-API.
 
+Disabling the GIL while manually managing threads with the `multithreading` API showed a massive speedup, achieved by reducing the median time spent in system mode by 42x. However, the single threaded version was still faster. 
+
 ![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
 
 ![Median task clock per command](docs/assets/task_clock_median.png){ width=100% }
@@ -153,8 +155,7 @@ We beat the `hashlib` standard library by 13.525 ns or 101703681.5 instructions.
 |true  |multiprocessing |map_async.py                           |        244913585430|         61218.555|       61.0370955|       0.2066270|
 |true  |multiprocessing |map.py                                 |        245013383854|         61259.295|       61.0844710|       0.2048880|
 
-Disabling the GIL while manually managing the threads and memory using the `multithreading` API also showed very promising results.
-
+<!--
 
 # Addendum
 
@@ -221,6 +222,8 @@ Vulnerability Tsx async abort:        Not affected
 Flags:                                fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm jscvt fcma lrcpc dcpop sha3 asimddp sha512 asimdfhm dit uscat
                                        ilrcpc flagm ssbs sb paca pacg dcpodp flagm2 frint
 ```
+
+-->
 
 [^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
 [^gil]: Wang, Z., Bu, D., Sun, A., Gou, S., Wang, Y., & Chen, L. (2022). An empirical study on bugs in python interpreters. IEEE Transactions on Reliability, 71(2), 716-734.
