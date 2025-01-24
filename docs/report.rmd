@@ -33,12 +33,6 @@ header-includes:
     - \setlength{\LTright}{0pt}
 ---
 
-<!--
-assignment: https://www.complang.tuwien.ac.at/anton/lvas/effizienz-aufgabe24/
-
-18min presentation
--->
-
 In October 2024, Python surpassed JavaScript for the first time as the most popular language on GitHub's Octoverse[^octo]. This high-level, interpreted, garbage-collected and dynamically-typed language emphasizes code readability and simplicity both in its implementation and syntax. This emphasis on simplicity also reflects itself in the language's community, often referred to as the "Pythonic" way of doing things.
 
 However, the language's simplicity comes at a cost: While memory and network-bound tasks can be efficiently managed through colored functions[^color] and `asyncio`, Python is notoriously slow for compute-bound tasks due to the Global Interpreter Lock (GIL)[^gil].
@@ -151,11 +145,149 @@ More importantly, disabling the GIL while individually managing threads with the
 
 These insights provide a valuable foundation for future work in optimizing Python performance and offer practical guidance for developers seeking to enhance the efficiency of their applications.
 
-![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
+<!-- ![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
 
 ![Median task clock per command](docs/assets/task_clock_median.png){ width=100% }
 
-![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% }
+![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% } -->
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+deps <- c("ISLR", "Metrics", "ggplot2", "tidyr", "dplyr", "patchwork", "gridExtra", "knitr")
+for (p in deps) {
+    if (!requireNamespace(p, quietly = TRUE)) {
+        install.packages(p, repos = "https://cran.rstudio.com")
+    }
+    library(p, character.only = TRUE)
+}
+
+set.seed(42)
+options(scipen=999)
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=15, fig.height=10}
+df <- read.csv("./data_v2_edited.csv")
+
+tmp_df <- df[, !(names(df) %in% c("time_elapsed", "cycles"))]
+tmp_df <- tmp_df %>%
+    group_by(gil, type, command) %>%
+    summarise_all(list(median = median)) %>%
+    arrange(instructions_median)
+
+tmp_df <- tmp_df[, !(names(tmp_df) %in% c("task_clock_median", "user_time_median", "sys_time_median"))]
+tmp_df <- tmp_df[order(-tmp_df$instructions_median),]
+
+ggplot(tmp_df, aes(x = reorder(ifelse(gil == "false", paste("(GIL disabled)", type, "–", command), paste(type, "–", command)), -instructions_median), y = instructions_median, group = 1)) +
+    geom_point(size = 4) +
+    geom_line(size = 1) +
+    geom_hline(data = tmp_df %>% filter(type == "plain" & command == "lib.py"), aes(yintercept = instructions_median), color = "red", linetype = "dashed", size = 1.5) +
+    annotate("text", x = 1, y = tmp_df %>% filter(type == "plain" & command == "lib.py") %>% pull(instructions_median), label = "standard library", color = "red", vjust = -1, hjust = -1, size = 6) +
+    scale_y_log10(labels = scales::comma) +
+    labs(
+        x = "GIL, Optimization Type, Command",
+        y = "Instructions Median",
+        title = "Median Instructions per Command"
+    ) +
+    theme_minimal() +
+    theme(
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        plot.title = element_text(size = 16)
+    )
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=15, fig.height=10}
+df <- read.csv("./data_v2_edited.csv")
+
+tmp_df <- df[, !(names(df) %in% c("time_elapsed", "cycles"))]
+tmp_df <- tmp_df %>%
+    group_by(gil, type, command) %>%
+    summarise_all(list(median = median)) %>%
+    arrange(instructions_median)
+
+tmp_df <- tmp_df[, !(names(tmp_df) %in% c("instructions_median", "user_time_median", "sys_time_median"))]
+tmp_df <- tmp_df[order(-tmp_df$task_clock_median),]
+
+ggplot(tmp_df, aes(x = reorder(ifelse(gil == "false", paste("(GIL disabled)", type, "–", command), paste(type, "–", command)), -task_clock_median), y = task_clock_median, group = 1)) +
+    geom_point(size = 4) +
+    geom_line(size = 1) +
+    geom_hline(data = tmp_df %>% filter(type == "plain" & command == "lib.py"), aes(yintercept = task_clock_median), color = "red", linetype = "dashed", size = 1.5) +
+    annotate("text", x = 1, y = tmp_df %>% filter(type == "plain" & command == "lib.py") %>% pull(task_clock_median), label = "standard library", color = "red", vjust = -1, hjust = -1, size = 6) +
+    scale_y_log10(labels = scales::comma) +
+    labs(
+        x = "GIL, Optimization Type, Command",
+        y = "Task Clock Median",
+        title = "Median task clock per command"
+    ) +
+    theme_minimal() +
+    theme(
+        axis.text.x = element_text(angle = 90, hjust = 1, size = 12),
+        axis.text.y = element_text(size = 12),
+        axis.title = element_text(size = 14),
+        plot.title = element_text(size = 16)
+    )
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=10, fig.height=5}
+df <- read.csv("./data_v1.csv")
+
+ggplot(df, aes(y = reorder(command, median), x = median)) +
+    geom_segment(aes(x = min, xend = max, yend = command)) +
+    geom_point(aes(x = min), shape = "|", size = 4) +
+    geom_point(aes(x = max), shape = "|", size = 4) +
+    geom_point(aes(x = median), shape = 18, size = 3, color = "red") +
+    geom_text(aes(x = max + 0.05, label = sprintf("User: %.3f\nSystem: %.3f", user, system)), hjust = +0.5, size = 2) +
+    labs(title = "Median Execution time per Command", x = "Median Execution Time (s)", y = "Command") +
+    theme(axis.text.y = element_text(size = 8), plot.margin = margin(r = 100, unit = "pt")) +
+    scale_x_continuous(expand = expansion(mult = c(0.05, 0.3))) +
+    theme_light()
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width=20, fig.height=10}
+df <- read.csv("./data_v2_edited.csv")
+
+# time_elapsed = also system load, I/O waiting time, context switching, interference by other processes, ... -> only useful for user experience
+df <- df[, !(names(df) %in% c("time_elapsed"))]
+
+# task_clock = user_time + system_time
+# - user_time = code efficiency -> user space, code efficiency
+# - system_time = kernel operation overhead -> kernel space, Process management, Inter-process communication, Context switching, System calls
+df <- df[, !(names(df) %in% c("user_time", "sys_time"))]
+
+# cycles also measure NOPs or waiting cores, so it can be misleading
+df <- df[, !(names(df) %in% c("cycles"))]
+
+# group by id and get median
+df <- df %>%
+    group_by(gil, type, command) %>%
+    summarise_all(list(median = median)) 
+
+# ggplot(df, aes(x = task_clock_median, y = instructions_median, color = type)) +
+#     geom_point(size = 5) +
+#     geom_text(aes(label = command), hjust = -0.1, size = 5) +
+#     geom_point(data = df %>% filter(gil == "false"), aes(x = task_clock_median, y = instructions_median), shape = 1, size = 7, color = "black") +
+#     scale_x_log10(labels = scales::comma) +
+#     scale_y_log10(labels = scales::comma) +
+#     scale_color_brewer(palette = "Set2") +
+#     labs(
+#         x = "Task Clock (ms)",
+#         y = "Instructions",
+#         color = "Type",
+#         caption = "A ring means GIL = false"
+#     ) +
+#     theme_light() +
+#     theme(
+#         legend.position = "bottom",
+#         plot.margin = margin(1, 3, 1, 1, "cm"),
+#         axis.text = element_text(size = 14),
+#         axis.title = element_text(size = 16),
+#         legend.text = element_text(size = 14),
+#         legend.title = element_text(size = 16),
+#         plot.title = element_text(size = 18),
+#         plot.caption = element_text(size = 14, hjust = 0.5)
+#     )
+```
 
 # Addendum
 
