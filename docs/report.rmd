@@ -1,6 +1,6 @@
 ---
 title: "Breaking free from the GIL"
-subtitle: "Code: [`github.com/sueszli/nogil`](https://github.com/sueszli/nogil)"
+subtitle: "Code: [`github.com/sueszli/nogil`](https://github.com/sueszli/nogil) \\hfill Yahya Jabary, TU Wien"
 output: pdf_document
 fontsize: 9pt
 documentclass: article
@@ -17,7 +17,7 @@ header-includes:
     - \usepackage{titling}
     - \setlength{\droptitle}{-15pt}
     - \pretitle{\vspace{-30pt}\begin{center}\LARGE}
-    - \posttitle{\end{center}\vspace{-30pt}}    
+    - \posttitle{\end{center}\vspace{-20pt}}    
     # code
     - \usepackage{fancyvrb}
     - \fvset{fontsize=\fontsize{8pt}{8pt}\selectfont}
@@ -56,7 +56,7 @@ Recent developments in Python's concurrency capabilities, such as the removal of
 
 In this report, we will explore the optimization of a compute-bound task in Python across varying levels of abstraction. We will analyze the trade-offs between performance and usability, shedding light on how Python's evolving capabilities can be leveraged effectively.
 
-# 1. Algorithm: Naive Brute-Force Collision Attack
+# Algorithm: Naive Brute-Force Collision Attack
 
 The embarrassingly parallel algorithm we have selected to demonstrate our optimizations, particularly the GIL-free multithreaded implementation, to put in contrast with the alternatives is a brute-force password cracker, most popular from the open-source library `hashcat`. The algorithm is simple: given a target hash, from a given character set and a maximum password length, the cracker generates all possible passwords and hashes them using the same algorithm. If the generated hash matches the target hash, the password is found and the program terminates.
 
@@ -76,15 +76,15 @@ In initial experiments, we self-implemented 3 distinct hash functions $H(x)$ in 
 
 To validate the correctness of our implementations, we have cross-validated the results with the `hashlib` library in Python. Due to the slow performance of any implementation other than our thoroughly optimized `sha1` implementation, we have decided to use it for the remainder of our experiments - unless otherwise noted.
 
-# 2. Methodology: Different Levels of Abstraction
+# Methodology: Different Levels of Abstraction
 
 To benchmark our experiments with the experimental GIL-free CPython version 13t (threaded), we implemented a Docker container that builds Python from source and sets the correct compile flags to disable the GIL. The container additionally serves to increase isolation and the reproducibility of our experiments.
 
-#### 1) Plain Python
+#### 1. Plain Python
 
 The most straightforward implementation of the brute-force attack is a simple loop that iterates over all possible passwords and hashes them. We have implemented this in three different ways: (1) completely free of any libraries, (2) using the `itertools` library to improve succinctness and (3) using the `hashlib` library for hashing (in just 4 LoC).
 
-#### 2) Multiprocessing
+#### 2. Multiprocessing
 
 The `multiprocessing` module in Python allows for parallel processing by creating separate processes for each task. We have implemented the brute-force attack using the `map`, `imap`, `map_async`, and `imap_unordered` functions to compare the performance of different parallelization strategies. We omitted the `starmap` function as it is just syntactic sugar for `map` and the Executor API as the overhead of creating a new process for each task is too high.
 
@@ -95,13 +95,13 @@ When using the `multiprocessing` library in Python, we can call multiple system 
 - Resource overhead: memory allocation, creation, and management are slower for processes. Additionally, having a unique copy of the interpreter for each process is really wasteful.
 - Serialization overhead: there is no shared memory, so data has to be serialized and deserialized for inter-process communication. Also, some objects are unserializable: the pickle module is used to serialize objects. But some objects are not pickleable (i.e. lambdas, file handles, etc.).
 
-#### 3) Multithreading
+#### 3. Multithreading
 
 The `threading` module in Python allows for parallel processing by creating separate threads for each task. With the GIL-free Python, this level of abstraction is expected to experience the most significant performance improvements. We have implemented the brute-force attack using the `ThreadPoolExecutor` and `Thread` classes to compare the performance of different parallelization strategies. While the `ThreadPoolExecutor` is more convenient, the `Thread` class allows for more fine-grained control over the threads and resembles the join API of C more closely.
 
 When using the `threading` library in Python with the GIL released using the `GIL=0` flag, we achieve the lowest overhead and the highest performance of any pure Python implementation for parallel processing.
 
-#### 4) ctypes
+#### 4. CTypes
 
 CTypes is a foreign function interface (FFI) for Python that allows calling functions from shared libraries.
 
@@ -113,13 +113,13 @@ We did so by only passing the target hash $h_{target}$ to the C function and ret
 
 Ctypes aren't meant to be used for high performance libraries that you use frequently but codebase-glue. you can still use them for that purpose and gain a significant amount of performance, but you have to move as much of the computation as possible into the C implementation.
 
-#### 5) CPython
+#### 5. CPython
 
 Finally, we have implemented the brute-force attack by extending the CPython interpreter directly. Given our lessons from previous experiments, we have decided to use the `openssl/sha.h` implementation for hashing and leave out the OpenMP parallelization.
 
 Extending CPython has neglible to no overhead and allows to share large chunks of memory by calling `mmap()` directly. However, it comes with a very complex API and requires you to manually manage the GIL with `Py_BEGIN_ALLOW_THREADS` and `Py_END_ALLOW_THREADS` macros and marshal all data passed between the C and Python code. It also isn't portable and requires a lot of boilerplate code to build and distribute.
 
-# 3. Results
+# Results
 
 We beat `hashlib` by 13.525ns (2.5x) or 101,703,681 instructions (3.3x). This was achieved through the `ctypes` library, CPython-C-API and various C libraries.
 
@@ -143,14 +143,9 @@ We beat `hashlib` by 13.525ns (2.5x) or 101,703,681 instructions (3.3x). This wa
 
 More importantly, disabling the GIL while individually managing threads with the `multithreading` API reduced time spent on syscalls by 42x. This shows that the GIL is a significant bottleneck for parallel computing in Python. Nonetheless, the single threaded implementation invoking the `hashlib` library, our `ctypes` implementation or the CPython extension are most likely the best choice for most performance critical applications.
 
+All experiments were conducted on an 11th Gen Intel Core i7-1165G7 processor running at 2.80 GHz with 16 GB of RAM.
+
 These insights provide a valuable foundation for future work in optimizing Python performance and offer practical guidance for developers seeking to enhance the efficiency of their applications.
-
-<!-- ![Median instructions per command](docs/assets/instructions_median.png){ width=100% }
-
-![Median task clock per command](docs/assets/task_clock_median.png){ width=100% }
-
-![Median task clock vs. instructions per command](docs/assets/task_clock_vs_instructions.png){ width=100% } -->
-
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 deps <- c("ISLR", "Metrics", "ggplot2", "tidyr", "dplyr", "patchwork", "gridExtra", "knitr")
@@ -287,17 +282,6 @@ df <- df %>%
 #         plot.title = element_text(size = 18),
 #         plot.caption = element_text(size = 14, hjust = 0.5)
 #     )
-```
-
-# Addendum
-
-All experiments were conducted on a consumer-grade laptop with the following specifications:
-
-```
-Processor: 11th Gen Intel(R) Core(TM) i7-1165G7 @ 2.80GHz   2.80 GHz
-RAM: 16,0 GB (15,7 GB usable)
-Windows 10 Pro - Version 22H2
-Python 3.13
 ```
 
 [^octo]: https://github.blog/news-insights/octoverse/octoverse-2024/#the-most-popular-programming-languages
