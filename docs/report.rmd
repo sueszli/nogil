@@ -1,6 +1,6 @@
 ---
 title: "Breaking free from the GIL"
-subtitle: "Code: [`github.com/sueszli/nogil`](https://github.com/sueszli/nogil) \\hfill Yahya Jabary, Prof.\ Dr.\ Anton Ertl, TU Wien"
+subtitle: "Code: [`github.com/sueszli/nogil`](https://github.com/sueszli/nogil) \\hfill Yahya Jabary, TU Wien"
 output: pdf_document
 fontsize: 9pt
 documentclass: article
