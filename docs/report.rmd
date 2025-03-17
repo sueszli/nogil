@@ -17,7 +17,7 @@ header-includes:
     - \usepackage{titling}
     - \setlength{\droptitle}{-15pt}
     - \pretitle{\vspace{-30pt}\begin{center}\LARGE}
-    - \posttitle{\end{center}\vspace{-20pt}}    
+    - \posttitle{\end{center}\vspace{-10pt}}    
     # code
     - \usepackage{fancyvrb}
     - \fvset{fontsize=\fontsize{8pt}{8pt}\selectfont}
