@@ -20,7 +20,7 @@ Check out the:
                     `.   ~ - - - - ~   .'
                        ~ . _ _ _ _ . ~
 
-> Note: Free-threading became stable since version 3.14 (see: https://py-free-threading.github.io/)
+> note: this is an older experiment. free-threading became stable from python 3.14.
 
 File tree:
 
