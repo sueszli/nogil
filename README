@@ -20,6 +20,8 @@ Check out the:
                     `.   ~ - - - - ~   .'
                        ~ . _ _ _ _ . ~
 
+> Note: Free-threading became stable since version 3.14 (see: https://py-free-threading.github.io/)
+
 File tree:
 
 - `src/0_plain`: plain python implementations of hashcat
